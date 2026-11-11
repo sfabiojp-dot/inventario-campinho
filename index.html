@@ -205,7 +205,9 @@
                 const card = document.createElement("div");
                 card.className = "card";
                 
-                const imgPath = item.img || '';
+                // Procura a imagem no item ou recorre ao padrão
+                const itemPadrao = dadosPadrao[catAtual] ? dadosPadrao[catAtual][idx] : null;
+                const imgPath = item.img || (itemPadrao ? itemPadrao.img : '');
                 
                 card.innerHTML = `
                     <img src="${imgPath}" class="item-img" alt="Capa" onerror="this.style.display='none'">
@@ -232,46 +234,4 @@
         function gerarTextoRelatorio() {
             let txt = "===============================================\n";
             txt += "    RELATÓRIO DE INVENTÁRIO - CAMPINHO/PRAÇA SECA \n";
-            txt += "===============================================\n\n";
-
-            Object.keys(dados).forEach(cat => {
-                txt += `[ ${cat.toUpperCase()} ]\n`;
-                txt += "-----------------------------------------------\n";
-                dados[cat].forEach(item => {
-                    const q1 = item.q[0] || 0;
-                    const q2 = item.q[1] || 0;
-                    const q3 = item.q[2] || 0;
-                    const total = q1 + q2 + q3;
-                    
-                    txt += `${item.nome}\n`;
-                    txt += `  -> Qtd 1: ${q1} | Qtd 2: ${q2} | Qtd 3: ${q3} | Total: ${total}\n\n`;
-                });
-                txt += "\n";
-            });
-            return txt;
-        }
-
-        function exportarTXT() {
-            const txt = gerarTextoRelatorio();
-            const blob = new Blob([txt], { type: 'text/plain;charset=utf-8;' });
-            const link = document.createElement("a");
-            link.href = URL.createObjectURL(blob);
-            link.download = "inventario_campinho_praca_seca.txt";
-            link.click();
-        }
-
-        function iniciarContagem() {
-            if (confirm("Deseja iniciar uma nova contagem e zerar todas as quantidades do inventário?")) {
-                Object.keys(dados).forEach(cat => {
-                    dados[cat].forEach(item => item.q = [0,0,0]);
-                });
-                salvarLocal();
-                renderItems();
-            }
-        }
-
-        renderCats();
-        renderItems();
-    </script>
-</body>
-</html>
+            txt += "================
