@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventário Campinho v1.02</title>
+    <style>
+        :root {
+            --primary: #1f538d;
+            --bg: #f4f6f9;
+            --card: #ffffff;
+            --text: #1a1a1a;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 12px;
+        }
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 14px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 12px;
+        }
+        .nav-cats {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+            margin-bottom: 12px;
+            -webkit-overflow-scrolling: touch;
+        }
+        .cat-btn {
+            background: #e2e8f0;
+            color: #334155;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 20px;
+            white-space: nowrap;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .cat-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+        .card {
+            background: var(--card);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .item-title {
+            font-size: 0.95rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+        .qtd-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .qtd-input {
+            width: 50px;
+            height: 36px;
+            text-align: center;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        .total-badge {
+            margin-left: auto;
+            font-weight: bold;
+            font-size: 0.95rem;
+            color: #0f172a;
+            background: #f1f5f9;
+            padding: 6px 10px;
+            border-radius: 6px;
+        }
+        .actions {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .action-btn {
+            flex: 1;
+            min-width: 100px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 0.95rem;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <header>📦 Inventário Campinho v1.02</header>
+
+    <div class="nav-cats" id="catNav"></div>
+
+    <div id="itemsContainer"></div>
+
+    <div class="actions">
+        <button class="action-btn" onclick="exportarTXT()">📄 Baixar TXT</button>
+        <button class="action-btn" style="background: #059669;" onclick="enviarPorEmail()">📧 Enviar E-mail</button>
+        <button class="action-btn" style="background: #dc2626;" onclick="zerarContagem()">🔄 Zerar</button>
+    </div>
+
+    <script>
+        // Substitua pelo URL gerado no Google Apps Script para ativação do e-mail
+        const URL_WEBHOOK_GOOGLE = "COLE_AQUI_O_URL_DO_GOOGLE_APPS_SCRIPT";
+
+        const dadosPadrao = {
+            "Bíblias": [
+                { nome: "(nwt) Tradução do Novo Mundo", q: [0,0,0] },
+                { nome: "(nwtls) TNM (revisada - grande)", q: [0,0,0] },
+                { nome: "(nwtpkt) TNM (revisada - pequena)", q: [0,0,0] }
+            ],
+            "Livros": [
+                { nome: "(bhs) Entender a Bíblia!", q: [0,0,0] },
+                { nome: "(bt) Testemunho Cabal", q: [3,0,0] },
+                { nome: "(lff) Seja Feliz para Sempre!", q: [30,0,0] },
+                { nome: "(od) Organizados", q: [21,0,0] },
+                { nome: "(lvs) Continue a Amar a Deus", q: [16,0,0] },
+                { nome: "(rr) Adoração Pura Restabelecida!", q: [0,0,0] },
+                { nome: "(jy) Jesus — O Caminho", q: [0,0,0] },
+                { nome: "(ia) Imite a Sua Fé", q: [0,0,0] },
+                { nome: "(kr) O Reino de Deus já Governa!", q: [0,0,0] }
+            ],
+            "Brochuras e livretos": [
+                { nome: "(ld) Escute a Deus", q: [300,0,0] },
+                { nome: "(lffi) Seja Feliz para Sempre! (brochura)", q: [690,0,0] },
+                { nome: "(wfg) Aprenda com a Sabedoria de Jesus", q: [83,0,0] },
+                { nome: "(lc) A Vida — Teve um Criador?", q: [0,0,0] },
+                { nome: "(fg) Boas Notícias de Deus!", q: [0,0,0] },
+                { nome: "(rj) Volte para Jeová", q: [0,0,0] }
+            ],
+            "Folhetos": [
+                { nome: "(T-30) O Que Você Acha da Bíblia?", q: [0,0,0] },
+                { nome: "(T-31) Como Você Vê o Futuro?", q: [0,0,0] },
+                { nome: "(T-32) O Que É Preciso para Ter uma Família Feliz?", q: [0,0,0] },
+                { nome: "(T-33) Quem É o Verdadeiro Governante do Mundo?", q: [0,0,0] },
+                { nome: "(T-34) O Sofrimento Vai Acabar Algum Dia?", q: [0,0,0] }
+            ],
+            "Revistas": [
+                { nome: "A Sentinela (Público)", q: [0,0,0] },
+                { nome: "Despertai!", q: [0,0,0] }
+            ],
+            "Outros": [
+                { nome: "KITS Diversos", q: [0,0,0] },
+                { nome: "Cartões de Contato JW.ORG", q: [0,0,0] }
+            ]
+        };
+
+        let dados = JSON.parse(localStorage.getItem('inventario_campinho_dados')) || dadosPadrao;
+        let catAtual = Object.keys(dados)[0];
+
+        function salvarLocal() {
+            localStorage.setItem('inventario_campinho_dados', JSON.stringify(dados));
+        }
+
+        function renderCats() {
+            const nav = document.getElementById("catNav");
+            nav.innerHTML = "";
+            Object.keys(dados).forEach(cat => {
+                const btn = document.createElement("button");
+                btn.className = `cat-btn ${cat === catAtual ? 'active' : ''}`;
+                btn.innerText = cat;
+                btn.onclick = () => { catAtual = cat; renderCats(); renderItems(); };
+                nav.appendChild(btn);
+            });
+        }
+
+        function renderItems() {
+            const container = document.getElementById("itemsContainer");
+            container.innerHTML = "";
+            dados[catAtual].forEach((item, idx) => {
+                const total = (item.q[0] || 0) + (item.q[1] || 0) + (item.q[2] || 0);
+                const card = document.createElement("div");
+                card.className = "card";
+                card.innerHTML = `
+                    <div class="item-title">${item.nome}</div>
+                    <div class="qtd-container">
+                        <input type="number" class="qtd-input" value="${item.q[0]}" onchange="updateQtd('${catAtual}', ${idx}, 0, this.value)">
+                        <input type="number" class="qtd-input" value="${item.q[1]}" onchange="updateQtd('${catAtual}', ${idx}, 1, this.value)">
+                        <input type="number" class="qtd-input" value="${item.q[2]}" onchange="updateQtd('${catAtual}', ${idx}, 2, this.value)">
+                        <span class="total-badge">Total: ${total}</span>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function updateQtd(cat, itemIdx, fieldIdx, val) {
+            dados[cat][itemIdx].q[fieldIdx] = parseInt(val) || 0;
+            salvarLocal();
+            renderItems();
+        }
+
+        function gerarTextoRelatorio() {
+            let txt = "===============================================\n";
+            txt += "        RELATÓRIO DE INVENTÁRIO - CAMPINHO     \n";
+            txt += "===============================================\n\n";
+
+            Object.keys(dados).forEach(cat => {
+                txt += `[ ${cat.toUpperCase()} ]\n`;
+                txt += "-----------------------------------------------\n";
+                dados[cat].forEach(item => {
+                    const q1 = item.q[0] || 0;
+                    const q2 = item.q[1] || 0;
+                    const q3 = item.q[2] || 0;
+                    const total = q1 + q2 + q3;
+                    
+                    txt += `${item.nome}\n`;
+                    txt += `  -> Qtd 1: ${q1} | Qtd 2: ${q2} | Qtd 3: ${q3} | Total: ${total}\n\n`;
+                });
+                txt += "\n";
+            });
+            return txt;
+        }
+
+        function exportarTXT() {
+            const txt = gerarTextoRelatorio();
+            const blob = new Blob([txt], { type: 'text/plain;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "inventario_campinho.txt";
+            link.click();
+        }
+
+        async function enviarPorEmail() {
+            if (URL_WEBHOOK_GOOGLE === "COLE_AQUI_O_URL_DO_GOOGLE_APPS_SCRIPT") {
+                alert("Insira o URL do Google Apps Script na variável URL_WEBHOOK_GOOGLE para ativar o e-mail.");
+                return;
+            }
+
+            const txt = gerarTextoRelatorio();
+            alert("Enviando relatório por e-mail...");
+
+            try {
+                await fetch(URL_WEBHOOK_GOOGLE, {
+                    method: "POST",
+                    mode: "no-cors",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ txt: txt })
+                });
+                alert("✅ Solicitação de e-mail enviada!");
+            } catch (erro) {
+                alert("❌ Erro ao enviar e-mail: " + erro);
+            }
+        }
+
+        function zerarContagem() {
+            if (confirm("Deseja zerar todas as quantidades do inventário?")) {
+                Object.keys(dados).forEach(cat => {
+                    dados[cat].forEach(item => item.q = [0,0,0]);
+                });
+                salvarLocal();
+                renderItems();
+            }
+        }
+
+        renderCats();
+        renderItems();
+    </script>
+</body>
+</html>
