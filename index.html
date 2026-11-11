@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inventário Campinho/Praça Seca</title>
+    <title>Inventário Campinho/Praça Seca v1.03</title>
     <style>
         :root {
             --primary: #1f538d;
@@ -81,16 +81,35 @@
         .qtd-container {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
+            flex-wrap: wrap; /* Permite que os campos desçam de linha se forem muitos */
+            margin-top: 4px;
         }
         .qtd-input {
-            width: 48px;
+            width: 46px;
             height: 36px;
             text-align: center;
             border: 1px solid #cbd5e1;
             border-radius: 6px;
             font-size: 1rem;
             font-weight: 600;
+        }
+        .btn-add {
+            background-color: transparent;
+            color: var(--primary);
+            border: 2px dashed var(--primary);
+            border-radius: 6px;
+            width: 36px;
+            height: 36px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-add:active {
+            background-color: #e2e8f0;
         }
         .total-badge {
             margin-left: auto;
@@ -124,7 +143,7 @@
 </head>
 <body>
 
-    <header>📦 Inventário Campinho/Praça Seca</header>
+    <header>📦 Inventário Campinho/Praça Seca v1.03</header>
 
     <div class="nav-cats" id="catNav"></div>
 
@@ -201,22 +220,28 @@
             const container = document.getElementById("itemsContainer");
             container.innerHTML = "";
             dados[catAtual].forEach((item, idx) => {
-                const total = (item.q[0] || 0) + (item.q[1] || 0) + (item.q[2] || 0);
+                // Calcula o total somando todos os valores no array 'q'
+                const total = item.q.reduce((acc, val) => acc + (parseInt(val) || 0), 0);
+                
                 const card = document.createElement("div");
                 card.className = "card";
                 
-                // Força SEMPRE a leitura do caminho correto da imagem direto do script (ignora memória antiga)
                 const itemPadrao = dadosPadrao[catAtual] ? dadosPadrao[catAtual][idx] : null;
                 const imgPath = (itemPadrao ? itemPadrao.img : '');
+                
+                // Gera os campos de quantidade dinamicamente com base no tamanho do array
+                let inputsHtml = "";
+                item.q.forEach((qtd, fieldIdx) => {
+                    inputsHtml += `<input type="number" class="qtd-input" value="${qtd}" onchange="updateQtd('${catAtual}', ${idx}, ${fieldIdx}, this.value)">`;
+                });
                 
                 card.innerHTML = `
                     <img src="${imgPath}" class="item-img" alt="Capa" onerror="this.style.display='none'">
                     <div class="item-info">
                         <div class="item-title">${item.nome}</div>
                         <div class="qtd-container">
-                            <input type="number" class="qtd-input" value="${item.q[0]}" onchange="updateQtd('${catAtual}', ${idx}, 0, this.value)">
-                            <input type="number" class="qtd-input" value="${item.q[1]}" onchange="updateQtd('${catAtual}', ${idx}, 1, this.value)">
-                            <input type="number" class="qtd-input" value="${item.q[2]}" onchange="updateQtd('${catAtual}', ${idx}, 2, this.value)">
+                            ${inputsHtml}
+                            <button class="btn-add" onclick="adicionarCampo('${catAtual}', ${idx})" title="Adicionar novo campo de quantidade">+</button>
                             <span class="total-badge">Total: ${total}</span>
                         </div>
                     </div>
@@ -231,6 +256,13 @@
             renderItems();
         }
 
+        function adicionarCampo(cat, itemIdx) {
+            // Adiciona um novo campo com valor 0 na publicação específica
+            dados[cat][itemIdx].q.push(0);
+            salvarLocal();
+            renderItems();
+        }
+
         function gerarTextoRelatorio() {
             let txt = "===============================================\n";
             txt += "    RELATÓRIO DE INVENTÁRIO - CAMPINHO/PRAÇA SECA \n";
@@ -240,13 +272,18 @@
                 txt += `[ ${cat.toUpperCase()} ]\n`;
                 txt += "-----------------------------------------------\n";
                 dados[cat].forEach(item => {
-                    const q1 = item.q[0] || 0;
-                    const q2 = item.q[1] || 0;
-                    const q3 = item.q[2] || 0;
-                    const total = q1 + q2 + q3;
+                    let total = 0;
+                    let strQtds = "";
+                    
+                    // Varre todos os campos gerados dinamicamente
+                    item.q.forEach((qtd, i) => {
+                        const valor = parseInt(qtd) || 0;
+                        total += valor;
+                        strQtds += `Qtd ${i+1}: ${valor} | `;
+                    });
                     
                     txt += `${item.nome}\n`;
-                    txt += `  -> Qtd 1: ${q1} | Qtd 2: ${q2} | Qtd 3: ${q3} | Total: ${total}\n\n`;
+                    txt += `  -> ${strQtds}Total: ${total}\n\n`;
                 });
                 txt += "\n";
             });
@@ -264,7 +301,6 @@
 
         function iniciarContagem() {
             if (confirm("Deseja iniciar uma nova contagem e zerar todas as quantidades do inventário?")) {
-                // Remove totalmente a memória antiga para forçar o recarregamento das imagens corretas
                 localStorage.removeItem('inventario_campinho_dados');
                 window.location.reload(true);
             }
