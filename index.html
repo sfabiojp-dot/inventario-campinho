@@ -91,11 +91,9 @@
             margin-top: 20px;
             display: flex;
             gap: 10px;
-            flex-wrap: wrap;
         }
         .action-btn {
             flex: 1;
-            min-width: 100px;
             background: var(--primary);
             color: white;
             border: none;
@@ -104,6 +102,9 @@
             font-weight: bold;
             font-size: 0.95rem;
             cursor: pointer;
+        }
+        .action-btn:active {
+            opacity: 0.9;
         }
     </style>
 </head>
@@ -116,15 +117,11 @@
     <div id="itemsContainer"></div>
 
     <div class="actions">
+        <button class="action-btn" onclick="iniciarContagem()">🔄 Iniciar</button>
         <button class="action-btn" onclick="exportarTXT()">📄 Baixar TXT</button>
-        <button class="action-btn" style="background: #059669;" onclick="enviarPorEmail()">📧 Enviar E-mail</button>
-        <button class="action-btn" style="background: #dc2626;" onclick="zerarContagem()">🔄 Zerar</button>
     </div>
 
     <script>
-        // Substitua pelo URL gerado no Google Apps Script para ativação do e-mail
-        const URL_WEBHOOK_GOOGLE = "COLE_AQUI_O_URL_DO_GOOGLE_APPS_SCRIPT";
-
         const dadosPadrao = {
             "Bíblias": [
                 { nome: "(nwt) Tradução do Novo Mundo", q: [0,0,0] },
@@ -243,30 +240,8 @@
             link.click();
         }
 
-        async function enviarPorEmail() {
-            if (URL_WEBHOOK_GOOGLE === "COLE_AQUI_O_URL_DO_GOOGLE_APPS_SCRIPT") {
-                alert("Insira o URL do Google Apps Script na variável URL_WEBHOOK_GOOGLE para ativar o e-mail.");
-                return;
-            }
-
-            const txt = gerarTextoRelatorio();
-            alert("Enviando relatório por e-mail...");
-
-            try {
-                await fetch(URL_WEBHOOK_GOOGLE, {
-                    method: "POST",
-                    mode: "no-cors",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ txt: txt })
-                });
-                alert("✅ Solicitação de e-mail enviada!");
-            } catch (erro) {
-                alert("❌ Erro ao enviar e-mail: " + erro);
-            }
-        }
-
-        function zerarContagem() {
-            if (confirm("Deseja zerar todas as quantidades do inventário?")) {
+        function iniciarContagem() {
+            if (confirm("Deseja iniciar uma nova contagem e zerar todas as quantidades do inventário?")) {
                 Object.keys(dados).forEach(cat => {
                     dados[cat].forEach(item => item.q = [0,0,0]);
                 });
