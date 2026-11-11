@@ -205,6 +205,7 @@
                 const card = document.createElement("div");
                 card.className = "card";
                 
+                // Força SEMPRE a leitura do caminho correto da imagem direto do script (ignora memória antiga)
                 const itemPadrao = dadosPadrao[catAtual] ? dadosPadrao[catAtual][idx] : null;
                 const imgPath = (itemPadrao ? itemPadrao.img : '');
                 
@@ -263,11 +264,9 @@
 
         function iniciarContagem() {
             if (confirm("Deseja iniciar uma nova contagem e zerar todas as quantidades do inventário?")) {
-                Object.keys(dados).forEach(cat => {
-                    dados[cat].forEach(item => item.q = [0,0,0]);
-                });
-                salvarLocal();
-                renderItems();
+                // Remove totalmente a memória antiga para forçar o recarregamento das imagens corretas
+                localStorage.removeItem('inventario_campinho_dados');
+                window.location.reload(true);
             }
         }
 
