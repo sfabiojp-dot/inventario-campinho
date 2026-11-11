@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inventário Campinho v1.02</title>
+    <title>Inventário Campinho/Praça Seca</title>
     <style>
         :root {
             --primary: #1f538d;
@@ -57,6 +57,20 @@
             padding: 12px;
             margin-bottom: 10px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        .item-img {
+            width: 55px;
+            height: 75px;
+            object-fit: cover;
+            border-radius: 6px;
+            background-color: #e2e8f0;
+            flex-shrink: 0;
+        }
+        .item-info {
+            flex: 1;
         }
         .item-title {
             font-size: 0.95rem;
@@ -70,7 +84,7 @@
             gap: 8px;
         }
         .qtd-input {
-            width: 50px;
+            width: 48px;
             height: 36px;
             text-align: center;
             border: 1px solid #cbd5e1;
@@ -81,10 +95,10 @@
         .total-badge {
             margin-left: auto;
             font-weight: bold;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             color: #0f172a;
             background: #f1f5f9;
-            padding: 6px 10px;
+            padding: 6px 8px;
             border-radius: 6px;
         }
         .actions {
@@ -110,7 +124,7 @@
 </head>
 <body>
 
-    <header>📦 Inventário Campinho v1.02</header>
+    <header>📦 Inventário Campinho/Praça Seca</header>
 
     <div class="nav-cats" id="catNav"></div>
 
@@ -124,43 +138,43 @@
     <script>
         const dadosPadrao = {
             "Bíblias": [
-                { nome: "(nwt) Tradução do Novo Mundo", q: [0,0,0] },
-                { nome: "(nwtls) TNM (revisada - grande)", q: [0,0,0] },
-                { nome: "(nwtpkt) TNM (revisada - pequena)", q: [0,0,0] }
+                { nome: "(nwt) Tradução do Novo Mundo", q: [0,0,0], img: "imagens/nwt.jpg" },
+                { nome: "(nwtls) TNM (revisada - grande)", q: [0,0,0], img: "imagens/nwtls.jpg" },
+                { nome: "(nwtpkt) TNM (revisada - pequena)", q: [0,0,0], img: "imagens/nwtpkt.jpg" }
             ],
             "Livros": [
-                { nome: "(bhs) Entender a Bíblia!", q: [0,0,0] },
-                { nome: "(bt) Testemunho Cabal", q: [3,0,0] },
-                { nome: "(lff) Seja Feliz para Sempre!", q: [30,0,0] },
-                { nome: "(od) Organizados", q: [21,0,0] },
-                { nome: "(lvs) Continue a Amar a Deus", q: [16,0,0] },
-                { nome: "(rr) Adoração Pura Restabelecida!", q: [0,0,0] },
-                { nome: "(jy) Jesus — O Caminho", q: [0,0,0] },
-                { nome: "(ia) Imite a Sua Fé", q: [0,0,0] },
-                { nome: "(kr) O Reino de Deus já Governa!", q: [0,0,0] }
+                { nome: "(bhs) Entender a Bíblia!", q: [0,0,0], img: "imagens/bhs.jpg" },
+                { nome: "(bt) Testemunho Cabal", q: [3,0,0], img: "imagens/bt.jpg" },
+                { nome: "(lff) Seja Feliz para Sempre!", q: [30,0,0], img: "imagens/lff.jpg" },
+                { nome: "(od) Organizados", q: [21,0,0], img: "imagens/od.jpg" },
+                { nome: "(lvs) Continue a Amar a Deus", q: [16,0,0], img: "imagens/lvs.jpg" },
+                { nome: "(rr) Adoração Pura Restabelecida!", q: [0,0,0], img: "imagens/rr.jpg" },
+                { nome: "(jy) Jesus — O Caminho", q: [0,0,0], img: "imagens/jy.jpg" },
+                { nome: "(ia) Imite a Sua Fé", q: [0,0,0], img: "imagens/ia.jpg" },
+                { nome: "(kr) O Reino de Deus já Governa!", q: [0,0,0], img: "imagens/kr.jpg" }
             ],
             "Brochuras e livretos": [
-                { nome: "(ld) Escute a Deus", q: [300,0,0] },
-                { nome: "(lffi) Seja Feliz para Sempre! (brochura)", q: [690,0,0] },
-                { nome: "(wfg) Aprenda com a Sabedoria de Jesus", q: [83,0,0] },
-                { nome: "(lc) A Vida — Teve um Criador?", q: [0,0,0] },
-                { nome: "(fg) Boas Notícias de Deus!", q: [0,0,0] },
-                { nome: "(rj) Volte para Jeová", q: [0,0,0] }
+                { nome: "(ld) Escute a Deus", q: [300,0,0], img: "imagens/ld.jpg" },
+                { nome: "(lffi) Seja Feliz para Sempre! (brochura)", q: [690,0,0], img: "imagens/lffi.jpg" },
+                { nome: "(wfg) Aprenda com a Sabedoria de Jesus", q: [83,0,0], img: "imagens/wfg.jpg" },
+                { nome: "(lc) A Vida — Teve um Criador?", q: [0,0,0], img: "imagens/lc.jpg" },
+                { nome: "(fg) Boas Notícias de Deus!", q: [0,0,0], img: "imagens/fg.jpg" },
+                { nome: "(rj) Volte para Jeová", q: [0,0,0], img: "imagens/rj.jpg" }
             ],
             "Folhetos": [
-                { nome: "(T-30) O Que Você Acha da Bíblia?", q: [0,0,0] },
-                { nome: "(T-31) Como Você Vê o Futuro?", q: [0,0,0] },
-                { nome: "(T-32) O Que É Preciso para Ter uma Família Feliz?", q: [0,0,0] },
-                { nome: "(T-33) Quem É o Verdadeiro Governante do Mundo?", q: [0,0,0] },
-                { nome: "(T-34) O Sofrimento Vai Acabar Algum Dia?", q: [0,0,0] }
+                { nome: "(T-30) O Que Você Acha da Bíblia?", q: [0,0,0], img: "imagens/t30.jpg" },
+                { nome: "(T-31) Como Você Vê o Futuro?", q: [0,0,0], img: "imagens/t31.jpg" },
+                { nome: "(T-32) O Que É Preciso para Ter uma Família Feliz?", q: [0,0,0], img: "imagens/t32.jpg" },
+                { nome: "(T-33) Quem É o Verdadeiro Governante do Mundo?", q: [0,0,0], img: "imagens/t33.jpg" },
+                { nome: "(T-34) O Sofrimento Vai Acabar Algum Dia?", q: [0,0,0], img: "imagens/t34.jpg" }
             ],
             "Revistas": [
-                { nome: "A Sentinela (Público)", q: [0,0,0] },
-                { nome: "Despertai!", q: [0,0,0] }
+                { nome: "A Sentinela (Público)", q: [0,0,0], img: "imagens/w.jpg" },
+                { nome: "Despertai!", q: [0,0,0], img: "imagens/g.jpg" }
             ],
             "Outros": [
-                { nome: "KITS Diversos", q: [0,0,0] },
-                { nome: "Cartões de Contato JW.ORG", q: [0,0,0] }
+                { nome: "KITS Diversos", q: [0,0,0], img: "imagens/kits.jpg" },
+                { nome: "Cartões de Contato JW.ORG", q: [0,0,0], img: "imagens/cartoes.jpg" }
             ]
         };
 
@@ -190,13 +204,19 @@
                 const total = (item.q[0] || 0) + (item.q[1] || 0) + (item.q[2] || 0);
                 const card = document.createElement("div");
                 card.className = "card";
+                
+                const imgPath = item.img || '';
+                
                 card.innerHTML = `
-                    <div class="item-title">${item.nome}</div>
-                    <div class="qtd-container">
-                        <input type="number" class="qtd-input" value="${item.q[0]}" onchange="updateQtd('${catAtual}', ${idx}, 0, this.value)">
-                        <input type="number" class="qtd-input" value="${item.q[1]}" onchange="updateQtd('${catAtual}', ${idx}, 1, this.value)">
-                        <input type="number" class="qtd-input" value="${item.q[2]}" onchange="updateQtd('${catAtual}', ${idx}, 2, this.value)">
-                        <span class="total-badge">Total: ${total}</span>
+                    <img src="${imgPath}" class="item-img" alt="Capa" onerror="this.style.display='none'">
+                    <div class="item-info">
+                        <div class="item-title">${item.nome}</div>
+                        <div class="qtd-container">
+                            <input type="number" class="qtd-input" value="${item.q[0]}" onchange="updateQtd('${catAtual}', ${idx}, 0, this.value)">
+                            <input type="number" class="qtd-input" value="${item.q[1]}" onchange="updateQtd('${catAtual}', ${idx}, 1, this.value)">
+                            <input type="number" class="qtd-input" value="${item.q[2]}" onchange="updateQtd('${catAtual}', ${idx}, 2, this.value)">
+                            <span class="total-badge">Total: ${total}</span>
+                        </div>
                     </div>
                 `;
                 container.appendChild(card);
@@ -211,7 +231,7 @@
 
         function gerarTextoRelatorio() {
             let txt = "===============================================\n";
-            txt += "        RELATÓRIO DE INVENTÁRIO - CAMPINHO     \n";
+            txt += "    RELATÓRIO DE INVENTÁRIO - CAMPINHO/PRAÇA SECA \n";
             txt += "===============================================\n\n";
 
             Object.keys(dados).forEach(cat => {
@@ -236,7 +256,7 @@
             const blob = new Blob([txt], { type: 'text/plain;charset=utf-8;' });
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
-            link.download = "inventario_campinho.txt";
+            link.download = "inventario_campinho_praca_seca.txt";
             link.click();
         }
 
