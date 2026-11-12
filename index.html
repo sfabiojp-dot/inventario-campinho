@@ -338,4 +338,22 @@
 
         function iniciarContagem() {
             if (confirm("ATENÇÃO: Deseja iniciar um novo inventário? Isto vai atualizar as publicações e colocar as quantidades a ZERO.")) {
-                dados =
+                dados = JSON.parse(JSON.stringify(dadosPadrao));
+                
+                Object.keys(dados).forEach(cat => {
+                    dados[cat].forEach(item => {
+                        item.q = [0]; 
+                    });
+                });
+                
+                salvarLocal();
+                renderItems();
+                alert("Inventário zerado e publicações atualizadas!");
+            }
+        }
+
+        renderCats();
+        renderItems();
+    </script>
+</body>
+</html>
