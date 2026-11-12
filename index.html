@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inventário Campinho/Praça Seca v1.08</title>
+    <title>Inventário Campinho/Praça Seca v1.08.1</title>
     <style>
         :root {
             --primary: #1f538d;
@@ -159,7 +159,7 @@
 </head>
 <body>
 
-    <header>📦 Inventário Campinho/Praça Seca v1.08</header>
+    <header>📦 Inventário Campinho/Praça Seca v1.08.1</header>
 
     <div class="nav-cats" id="catNav"></div>
 
@@ -266,15 +266,38 @@
             ]
         };
 
-        let dados = JSON.parse(localStorage.getItem('inventario_campinho_dados')) || dadosPadrao;
+        let dadosSalvos = JSON.parse(localStorage.getItem('inventario_campinho_dados'));
+        let dados = {};
 
-        if (dados["Revistas"]) {
-            dados["Revistas"] = dados["Revistas"].filter(item => 
-                item.nome !== "A Sentinela (Público) - Avulsas" && 
-                item.nome !== "Despertai! (Avulsas)" && 
-                item.nome !== "A Sentinela (Público)"
-            );
+        // Sincronização Inteligente: Mescla a memória do celular com o código novo
+        if (dadosSalvos) {
+            Object.keys(dadosPadrao).forEach(cat => {
+                if (!dadosSalvos[cat]) {
+                    dados[cat] = JSON.parse(JSON.stringify(dadosPadrao[cat]));
+                } else {
+                    let novaArray = [];
+                    // 1. Mantém a ordem oficial do código e preserva as quantidades que o usuário já digitou
+                    dadosPadrao[cat].forEach(itemPadrao => {
+                        const itemSalvo = dadosSalvos[cat].find(i => i.nome === itemPadrao.nome);
+                        if (itemSalvo) {
+                            novaArray.push(itemSalvo);
+                        } else {
+                            novaArray.push(JSON.parse(JSON.stringify(itemPadrao)));
+                        }
+                    });
+                    // 2. Adiciona no final os itens que o usuário cadastrou manualmente pelo botão "➕"
+                    dadosSalvos[cat].forEach(itemSalvo => {
+                        const temNoPadrao = dadosPadrao[cat].find(i => i.nome === itemSalvo.nome);
+                        if (!temNoPadrao && itemSalvo.nome !== "A Sentinela (Público) - Avulsas" && itemSalvo.nome !== "Despertai! (Avulsas)" && itemSalvo.nome !== "A Sentinela (Público)") {
+                            novaArray.push(itemSalvo);
+                        }
+                    });
+                    dados[cat] = novaArray;
+                }
+            });
             localStorage.setItem('inventario_campinho_dados', JSON.stringify(dados));
+        } else {
+            dados = JSON.parse(JSON.stringify(dadosPadrao));
         }
 
         let catAtual = Object.keys(dados)[0];
@@ -326,7 +349,6 @@
                 container.appendChild(card);
             });
 
-            // Mostra o botão de cadastrar item em todas as abas, menos na "Bíblias"
             if (catAtual !== "Bíblias") {
                 const btnAddNova = document.createElement("button");
                 btnAddNova.className = "btn-new-item";
