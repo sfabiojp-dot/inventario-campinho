@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inventário Campinho/Praça Seca v1.06.2</title>
+    <title>Inventário Campinho/Praça Seca v1.07</title>
     <style>
         :root {
             --primary: #1f538d;
@@ -87,37 +87,38 @@
         }
         .qtd-input {
             width: 46px;
-            height: 36px;
+            height: 32px;
             text-align: center;
             border: 1px solid #cbd5e1;
             border-radius: 6px;
             font-size: 1rem;
             font-weight: 600;
         }
+        
+        /* Novos botões sólidos e menores */
         .btn-add, .btn-remove {
-            background-color: transparent;
-            border-radius: 6px;
-            width: 36px;
-            height: 36px;
-            font-size: 1.2rem;
+            border: none;
+            border-radius: 4px;
+            width: 28px;
+            height: 28px;
+            font-size: 1.1rem;
             font-weight: bold;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
+            color: white;
         }
         .btn-add {
-            color: var(--primary);
-            border: 2px dashed var(--primary);
+            background-color: var(--primary);
         }
         .btn-remove {
-            color: #ef4444;
-            border: 2px dashed #ef4444;
+            background-color: #ef4444;
         }
         .btn-add:active, .btn-remove:active {
             opacity: 0.7;
-            background-color: #e2e8f0;
         }
+
         .total-badge {
             margin-left: auto;
             font-weight: bold;
@@ -146,11 +147,27 @@
         .action-btn:active {
             opacity: 0.9;
         }
+        .btn-new-item {
+            width: 100%;
+            background-color: #f1f5f9;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 0.95rem;
+            cursor: pointer;
+            margin-top: 5px;
+            margin-bottom: 15px;
+        }
+        .btn-new-item:active {
+            background-color: #e2e8f0;
+        }
     </style>
 </head>
 <body>
 
-    <header>📦 Inventário Campinho/Praça Seca v1.06.2</header>
+    <header>📦 Inventário Campinho/Praça Seca v1.07</header>
 
     <div class="nav-cats" id="catNav"></div>
 
@@ -220,9 +237,26 @@
                 { nome: "(g21.1) Despertai!", q: [0], img: "imagens/g_T_202101_lg.jpg" },
                 { nome: "(g21.2) Despertai!", q: [0], img: "imagens/g_T_202102_lg.jpg" },
                 { nome: "(g21.3) Despertai!", q: [532], img: "imagens/g_T_202103_lg.jpg" },
-                { nome: "(g22.1) Despertai!", q: [0], img: "imagens/g_T_202201_lg.jpg" },
-                { nome: "A Sentinela (Público)", q: [0], img: "imagens/w_TPO_lg.jpg" },
-                { nome: "Despertai! (Avulsas)", q: [0], img: "imagens/g_TPO_lg.jpg" }
+                { nome: "(g22.1) Despertai!", q: [313], img: "imagens/g_T_202201_lg.jpg" },
+                { nome: "(g23.1) Despertai!", q: [0], img: "imagens/g_T_202301_lg.jpg" },
+                { nome: "(g24.1) Despertai!", q: [146], img: "imagens/g_T_202401_lg.jpg" },
+                { nome: "(g25.1) Despertai!", q: [350], img: "imagens/g_T_202501_lg.jpg" },
+                { nome: "(g26.1) Despertai!", q: [0], img: "imagens/g_T_202601_lg.jpg" },
+                { nome: "(wp18.1) A Sentinela (público)", q: [0], img: "imagens/wp_T_201801_lg.jpg" },
+                { nome: "(wp18.2) A Sentinela (público)", q: [0], img: "imagens/wp_T_201802_lg.jpg" },
+                { nome: "(wp18.3) A Sentinela (público)", q: [0], img: "imagens/wp_T_201803_lg.jpg" },
+                { nome: "(wp19.1) A Sentinela (público)", q: [18], img: "imagens/wp_T_201901_lg.jpg" },
+                { nome: "(wp19.2) A Sentinela (público)", q: [434], img: "imagens/wp_T_201902_lg.jpg" },
+                { nome: "(wp19.3) A Sentinela (público)", q: [0], img: "imagens/wp_T_201903_lg.jpg" },
+                { nome: "(wp20.1) A Sentinela (público)", q: [0], img: "imagens/wp_T_202001_lg.jpg" },
+                { nome: "(wp20.2) A Sentinela (público)", q: [0], img: "imagens/wp_T_202002_lg.jpg" },
+                { nome: "(wp20.3) A Sentinela (público)", q: [0], img: "imagens/wp_T_202003_lg.jpg" },
+                { nome: "(wp21.1) A Sentinela (público)", q: [836], img: "imagens/wp_T_202101_lg.jpg" },
+                { nome: "(wp21.2) A Sentinela (público)", q: [0], img: "imagens/wp_T_202102_lg.jpg" },
+                { nome: "(wp21.3) A Sentinela (público)", q: [0], img: "imagens/wp_T_202103_lg.jpg" },
+                { nome: "(wp22.1) A Sentinela (público)", q: [0], img: "imagens/wp_T_202201_lg.jpg" },
+                { nome: "(wp23.1) A Sentinela (público)", q: [0], img: "imagens/wp_T_202301_lg.jpg" },
+                { nome: "(wp24.1) A Sentinela (público)", q: [164], img: "imagens/wp_T_202401_lg.jpg" }
             ],
             "Outros": [
                 { nome: "KITS Diversos", q: [0], img: "imagens/kits_TPO_lg.jpg" },
@@ -257,8 +291,9 @@
                 const card = document.createElement("div");
                 card.className = "card";
                 
-                const itemPadrao = dadosPadrao[catAtual] ? dadosPadrao[catAtual][idx] : null;
-                const imgPath = (itemPadrao ? itemPadrao.img : '');
+                // Tenta puxar a imagem do dadosPadrao, se for um item novo manual, usa a imagem salva ou oculta
+                const itemPadrao = dadosPadrao[catAtual] ? dadosPadrao[catAtual].find(i => i.nome === item.nome) : null;
+                const imgPath = (itemPadrao ? itemPadrao.img : (item.img || ''));
                 
                 let inputsHtml = "";
                 item.q.forEach((qtd, fieldIdx) => {
@@ -271,14 +306,30 @@
                         <div class="item-title">${item.nome}</div>
                         <div class="qtd-container">
                             ${inputsHtml}
-                            <button class="btn-add" onclick="adicionarCampo('${catAtual}', ${idx})" title="Adicionar campo de quantidade">+</button>
-                            <button class="btn-remove" onclick="removerCampo('${catAtual}', ${idx})" title="Remover último campo">-</button>
+                            <button class="btn-add" onclick="adicionarCampo('${catAtual}', ${idx})" title="Adicionar campo">+</button>
+                            <button class="btn-remove" onclick="removerCampo('${catAtual}', ${idx})" title="Remover campo">-</button>
                             <span class="total-badge">Total: ${total}</span>
                         </div>
                     </div>
                 `;
                 container.appendChild(card);
             });
+
+            // Botão exclusivo para adicionar revistas novas
+            if (catAtual === "Revistas") {
+                const btnAddNova = document.createElement("button");
+                btnAddNova.className = "btn-new-item";
+                btnAddNova.innerText = "➕ Cadastrar número novo";
+                btnAddNova.onclick = () => {
+                    const nomeNova = prompt("Digite o nome ou código da nova revista (Ex: wp24.2):");
+                    if (nomeNova && nomeNova.trim() !== "") {
+                        dados["Revistas"].push({ nome: nomeNova.trim(), q: [0], img: "" });
+                        salvarLocal();
+                        renderItems();
+                    }
+                };
+                container.appendChild(btnAddNova);
+            }
         }
 
         function updateQtd(cat, itemIdx, fieldIdx, val) {
@@ -337,18 +388,30 @@
         }
 
         function iniciarContagem() {
-            if (confirm("ATENÇÃO: Deseja iniciar um novo inventário? Isto vai atualizar as publicações e colocar as quantidades a ZERO.")) {
-                dados = JSON.parse(JSON.stringify(dadosPadrao));
+            if (confirm("ATENÇÃO: Deseja iniciar um novo inventário? As quantidades voltarão a zero.")) {
+                let novosDados = JSON.parse(JSON.stringify(dadosPadrao));
                 
+                // Protege os itens que foram cadastrados manualmente pelo usuário para não serem apagados
                 Object.keys(dados).forEach(cat => {
                     dados[cat].forEach(item => {
-                        item.q = [0]; 
+                        let existeNoPadrao = novosDados[cat].find(i => i.nome === item.nome);
+                        if (!existeNoPadrao) {
+                            novosDados[cat].push({ nome: item.nome, q: [0], img: item.img || "" });
+                        }
                     });
                 });
                 
+                // Zera todas as quantidades para 0
+                Object.keys(novosDados).forEach(cat => {
+                    novosDados[cat].forEach(item => {
+                        item.q = [0]; 
+                    });
+                });
+
+                dados = novosDados;
                 salvarLocal();
                 renderItems();
-                alert("Inventário zerado e publicações atualizadas!");
+                alert("Inventário zerado com sucesso!");
             }
         }
 
