@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inventário Campinho/Praça Seca v1.03</title>
+    <title>Inventário Campinho/Praça Seca v1.04</title>
     <style>
         :root {
             --primary: #1f538d;
@@ -82,7 +82,7 @@
             display: flex;
             align-items: center;
             gap: 6px;
-            flex-wrap: wrap; /* Permite que os campos desçam de linha se forem muitos */
+            flex-wrap: wrap; 
             margin-top: 4px;
         }
         .qtd-input {
@@ -94,10 +94,8 @@
             font-size: 1rem;
             font-weight: 600;
         }
-        .btn-add {
+        .btn-add, .btn-remove {
             background-color: transparent;
-            color: var(--primary);
-            border: 2px dashed var(--primary);
             border-radius: 6px;
             width: 36px;
             height: 36px;
@@ -108,7 +106,16 @@
             align-items: center;
             justify-content: center;
         }
-        .btn-add:active {
+        .btn-add {
+            color: var(--primary);
+            border: 2px dashed var(--primary);
+        }
+        .btn-remove {
+            color: #ef4444;
+            border: 2px dashed #ef4444;
+        }
+        .btn-add:active, .btn-remove:active {
+            opacity: 0.7;
             background-color: #e2e8f0;
         }
         .total-badge {
@@ -143,57 +150,71 @@
 </head>
 <body>
 
-    <header>📦 Inventário Campinho/Praça Seca v1.03</header>
+    <header>📦 Inventário Campinho/Praça Seca v1.04</header>
 
     <div class="nav-cats" id="catNav"></div>
 
     <div id="itemsContainer"></div>
 
     <div class="actions">
-        <button class="action-btn" onclick="iniciarContagem()">🔄 Iniciar</button>
+        <button class="action-btn" onclick="iniciarContagem()">🔄 Iniciar inventário</button>
         <button class="action-btn" onclick="exportarTXT()">📄 Baixar TXT</button>
     </div>
 
     <script>
+        // Os arrays de quantidade "q" iniciam agora com apenas 1 valor.
         const dadosPadrao = {
             "Bíblias": [
-                { nome: "(nwt) Tradução do Novo Mundo", q: [0,0,0], img: "imagens/nwt_TPO_lg.jpg" },
-                { nome: "(nwtls) TNM (revisada - grande)", q: [0,0,0], img: "imagens/nwtls_TPO_lg.jpg" },
-                { nome: "(nwtpkt) TNM (revisada - pequena)", q: [0,0,0], img: "imagens/nwtpkt_TPO_lg.jpg" }
+                { nome: "(nwt) Tradução do Novo Mundo", q: [0], img: "imagens/nwt_TPO_lg.jpg" },
+                { nome: "(nwtls) TNM (revisada - grande)", q: [0], img: "imagens/nwtls_TPO_lg.jpg" },
+                { nome: "(nwtpkt) TNM (revisada - pequena)", q: [0], img: "imagens/nwtpkt_TPO_lg.jpg" }
             ],
             "Livros": [
-                { nome: "(bhs) Entender a Bíblia!", q: [0,0,0], img: "imagens/bhs_TPO_lg.jpg" },
-                { nome: "(bt) Testemunho Cabal", q: [3,0,0], img: "imagens/bt_TPO_lg.jpg" },
-                { nome: "(lff) Seja Feliz para Sempre!", q: [30,0,0], img: "imagens/lff_TPO_lg.jpg" },
-                { nome: "(od) Organizados", q: [21,0,0], img: "imagens/od_TPO_lg.jpg" },
-                { nome: "(lvs) Continue a Amar a Deus", q: [16,0,0], img: "imagens/lvs_TPO_lg.jpg" },
-                { nome: "(rr) Adoração Pura Restabelecida!", q: [0,0,0], img: "imagens/rr_TPO_lg.jpg" },
-                { nome: "(jy) Jesus — O Caminho", q: [0,0,0], img: "imagens/jy_TPO_lg.jpg" },
-                { nome: "(ia) Imite a Sua Fé", q: [0,0,0], img: "imagens/ia_TPO_lg.jpg" },
-                { nome: "(kr) O Reino de Deus já Governa!", q: [0,0,0], img: "imagens/kr_TPO_lg.jpg" }
+                { nome: "(bhs) Entender a Bíblia!", q: [0], img: "imagens/bhs_TPO_lg.jpg" },
+                { nome: "(bt) Testemunho Cabal", q: [3], img: "imagens/bt_TPO_lg.jpg" },
+                { nome: "(lff) Seja Feliz para Sempre!", q: [30], img: "imagens/lff_TPO_lg.jpg" },
+                { nome: "(od) Organizados", q: [21], img: "imagens/od_TPO_lg.jpg" },
+                { nome: "(lvs) Continue a Amar a Deus", q: [16], img: "imagens/lvs_TPO_lg.jpg" },
+                { nome: "(rr) Adoração Pura Restabelecida!", q: [0], img: "imagens/rr_TPO_lg.jpg" },
+                { nome: "(jy) Jesus — O Caminho", q: [0], img: "imagens/jy_TPO_lg.jpg" },
+                { nome: "(ia) Imite a Sua Fé", q: [0], img: "imagens/ia_TPO_lg.jpg" },
+                { nome: "(kr) O Reino de Deus já Governa!", q: [0], img: "imagens/kr_TPO_lg.jpg" }
             ],
             "Brochuras e livretos": [
-                { nome: "(ld) Escute a Deus", q: [300,0,0], img: "imagens/ld_TPO_lg.jpg" },
-                { nome: "(lffi) Seja Feliz para Sempre! (brochura)", q: [690,0,0], img: "imagens/lffi_TPO_lg.jpg" },
-                { nome: "(wfg) Aprenda com a Sabedoria de Jesus", q: [83,0,0], img: "imagens/wfg_TPO_lg.jpg" },
-                { nome: "(lc) A Vida — Teve um Criador?", q: [0,0,0], img: "imagens/lc_TPO_lg.jpg" },
-                { nome: "(fg) Boas Notícias de Deus!", q: [0,0,0], img: "imagens/fg_TPO_lg.jpg" },
-                { nome: "(rj) Volte para Jeová", q: [0,0,0], img: "imagens/rj_TPO_lg.jpg" }
+                { nome: "(ay) Aplique-se à Leitura e à Escrita", q: [3], img: "imagens/ay_TPO_lg.jpg" },
+                { nome: "(hf) Sua Família Pode Ser Feliz", q: [0], img: "imagens/hf_TPO_lg.jpg" },
+                { nome: "(hl) Como Ter Uma Vida Feliz", q: [0], img: "imagens/hl_TPO_lg.jpg" },
+                { nome: "(la) Uma Vida Satisfatória — Como Alcançá-la", q: [0], img: "imagens/la_TPO_lg.jpg" },
+                { nome: "(lc) A Vida — Teve um Criador?", q: [6], img: "imagens/lc_TPO_lg.jpg" },
+                { nome: "(ld) Escute a Deus", q: [300], img: "imagens/ld_TPO_lg.jpg" },
+                { nome: "(lf) A Origem da Vida", q: [13], img: "imagens/lf_TPO_lg.jpg" },
+                { nome: "(lffi) Seja Feliz para Sempre! (brochura)", q: [690], img: "imagens/lffi_TPO_lg.jpg" },
+                { nome: "(ll) Escute a Deus e Viva para Sempre", q: [5], img: "imagens/ll_TPO_lg.jpg" },
+                { nome: "(lmd) Ame as Pessoas — Faça Discípulos", q: [1], img: "imagens/lmd_TPO_lg.jpg" },
+                { nome: "(mb) Minhas Primeiras Lições da Bíblia", q: [4], img: "imagens/mb_TPO_lg.jpg" },
+                { nome: "(pc) Verdadeira Paz e Felicidade — Como Encontrá-la?", q: [0], img: "imagens/pc_TPO_lg.jpg" },
+                { nome: "(ph) O Caminho para a Paz e Felicidade", q: [0], img: "imagens/ph_TPO_lg.jpg" },
+                { nome: "(rj) Volte para Jeová", q: [0], img: "imagens/rj_TPO_lg.jpg" },
+                { nome: "(rk) A Verdadeira Fé — O Segredo de uma Vida Feliz", q: [0], img: "imagens/rk_TPO_lg.jpg" },
+                { nome: "(sp) Os Espíritos dos Mortos", q: [0], img: "imagens/sp_TPO_lg.jpg" },
+                { nome: "(th) Melhore Sua Leitura e Ensino", q: [9], img: "imagens/th_TPO_lg.jpg" },
+                { nome: "(wfg) Aprenda com a Sabedoria de Jesus", q: [83], img: "imagens/wfg_TPO_lg.jpg" },
+                { nome: "(ypq) 10 Perguntas que os Jovens Fazem", q: [0], img: "imagens/ypq_TPO_lg.jpg" }
             ],
             "Folhetos": [
-                { nome: "(T-30) O Que Você Acha da Bíblia?", q: [0,0,0], img: "imagens/t30_TPO_lg.jpg" },
-                { nome: "(T-31) Como Você Vê o Futuro?", q: [0,0,0], img: "imagens/t31_TPO_lg.jpg" },
-                { nome: "(T-32) O Que É Preciso para Ter uma Família Feliz?", q: [0,0,0], img: "imagens/t32_TPO_lg.jpg" },
-                { nome: "(T-33) Quem É o Verdadeiro Governante do Mundo?", q: [0,0,0], img: "imagens/t33_TPO_lg.jpg" },
-                { nome: "(T-34) O Sofrimento Vai Acabar Algum Dia?", q: [0,0,0], img: "imagens/t34_TPO_lg.jpg" }
+                { nome: "(T-30) O Que Você Acha da Bíblia?", q: [0], img: "imagens/t30_TPO_lg.jpg" },
+                { nome: "(T-31) Como Você Vê o Futuro?", q: [0], img: "imagens/t31_TPO_lg.jpg" },
+                { nome: "(T-32) O Que É Preciso para Ter uma Família Feliz?", q: [0], img: "imagens/t32_TPO_lg.jpg" },
+                { nome: "(T-33) Quem É o Verdadeiro Governante do Mundo?", q: [0], img: "imagens/t33_TPO_lg.jpg" },
+                { nome: "(T-34) O Sofrimento Vai Acabar Algum Dia?", q: [0], img: "imagens/t34_TPO_lg.jpg" }
             ],
             "Revistas": [
-                { nome: "A Sentinela (Público)", q: [0,0,0], img: "imagens/w_TPO_lg.jpg" },
-                { nome: "Despertai!", q: [0,0,0], img: "imagens/g_TPO_lg.jpg" }
+                { nome: "A Sentinela (Público)", q: [0], img: "imagens/w_TPO_lg.jpg" },
+                { nome: "Despertai!", q: [0], img: "imagens/g_TPO_lg.jpg" }
             ],
             "Outros": [
-                { nome: "KITS Diversos", q: [0,0,0], img: "imagens/kits_TPO_lg.jpg" },
-                { nome: "Cartões de Contato JW.ORG", q: [0,0,0], img: "imagens/cartoes_TPO_lg.jpg" }
+                { nome: "KITS Diversos", q: [0], img: "imagens/kits_TPO_lg.jpg" },
+                { nome: "Cartões de Contato JW.ORG", q: [0], img: "imagens/cartoes_TPO_lg.jpg" }
             ]
         };
 
@@ -220,16 +241,13 @@
             const container = document.getElementById("itemsContainer");
             container.innerHTML = "";
             dados[catAtual].forEach((item, idx) => {
-                // Calcula o total somando todos os valores no array 'q'
                 const total = item.q.reduce((acc, val) => acc + (parseInt(val) || 0), 0);
-                
                 const card = document.createElement("div");
                 card.className = "card";
                 
                 const itemPadrao = dadosPadrao[catAtual] ? dadosPadrao[catAtual][idx] : null;
                 const imgPath = (itemPadrao ? itemPadrao.img : '');
                 
-                // Gera os campos de quantidade dinamicamente com base no tamanho do array
                 let inputsHtml = "";
                 item.q.forEach((qtd, fieldIdx) => {
                     inputsHtml += `<input type="number" class="qtd-input" value="${qtd}" onchange="updateQtd('${catAtual}', ${idx}, ${fieldIdx}, this.value)">`;
@@ -241,7 +259,8 @@
                         <div class="item-title">${item.nome}</div>
                         <div class="qtd-container">
                             ${inputsHtml}
-                            <button class="btn-add" onclick="adicionarCampo('${catAtual}', ${idx})" title="Adicionar novo campo de quantidade">+</button>
+                            <button class="btn-add" onclick="adicionarCampo('${catAtual}', ${idx})" title="Adicionar campo de quantidade">+</button>
+                            <button class="btn-remove" onclick="removerCampo('${catAtual}', ${idx})" title="Remover último campo">-</button>
                             <span class="total-badge">Total: ${total}</span>
                         </div>
                     </div>
@@ -257,10 +276,18 @@
         }
 
         function adicionarCampo(cat, itemIdx) {
-            // Adiciona um novo campo com valor 0 na publicação específica
             dados[cat][itemIdx].q.push(0);
             salvarLocal();
             renderItems();
+        }
+
+        function removerCampo(cat, itemIdx) {
+            // Garante que fica sempre pelo menos um campo visível
+            if (dados[cat][itemIdx].q.length > 1) {
+                dados[cat][itemIdx].q.pop();
+                salvarLocal();
+                renderItems();
+            }
         }
 
         function gerarTextoRelatorio() {
@@ -275,7 +302,6 @@
                     let total = 0;
                     let strQtds = "";
                     
-                    // Varre todos os campos gerados dinamicamente
                     item.q.forEach((qtd, i) => {
                         const valor = parseInt(qtd) || 0;
                         total += valor;
@@ -300,9 +326,16 @@
         }
 
         function iniciarContagem() {
-            if (confirm("Deseja iniciar uma nova contagem e zerar todas as quantidades do inventário?")) {
-                localStorage.removeItem('inventario_campinho_dados');
-                window.location.reload(true);
+            if (confirm("ATENÇÃO: Deseja iniciar um novo inventário? Isto vai colocar todas as quantidades a ZERO em todas as abas.")) {
+                // Percorre todos os itens de todas as categorias e zera-os à força
+                Object.keys(dados).forEach(cat => {
+                    dados[cat].forEach(item => {
+                        item.q = [0]; // Reduz a 1 campo com valor 0
+                    });
+                });
+                salvarLocal();
+                renderItems();
+                alert("O inventário foi zerado com sucesso. Pode iniciar a contagem!");
             }
         }
 
