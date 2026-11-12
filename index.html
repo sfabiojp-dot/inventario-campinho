@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inventário Campinho/Praça Seca v1.06.1</title>
+    <title>Inventário Campinho/Praça Seca v1.06.2</title>
     <style>
         :root {
             --primary: #1f538d;
@@ -150,7 +150,7 @@
 </head>
 <body>
 
-    <header>📦 Inventário Campinho/Praça Seca v1.06.1</header>
+    <header>📦 Inventário Campinho/Praça Seca v1.06.2</header>
 
     <div class="nav-cats" id="catNav"></div>
 
@@ -208,19 +208,19 @@
                 { nome: "(T-34) O Sofrimento Vai Acabar Algum Dia?", q: [0], img: "imagens/t34_TPO_lg.jpg" }
             ],
             "Revistas": [
-                { nome: "(g18.1) Despertai!", q: [0], img: "imagens/g18.1_TPO_lg.jpg" },
-                { nome: "(g18.2) Despertai!", q: [576], img: "imagens/g18.2_TPO_lg.jpg" },
-                { nome: "(g18.3) Despertai!", q: [18], img: "imagens/g18.3_TPO_lg.jpg" },
-                { nome: "(g19.1) Despertai!", q: [0], img: "imagens/g19.1_TPO_lg.jpg" },
-                { nome: "(g19.2) Despertai!", q: [0], img: "imagens/g19.2_TPO_lg.jpg" },
-                { nome: "(g19.3) Despertai!", q: [0], img: "imagens/g19.3_TPO_lg.jpg" },
-                { nome: "(g20.1) Despertai!", q: [0], img: "imagens/g20.1_TPO_lg.jpg" },
-                { nome: "(g20.2) Despertai!", q: [0], img: "imagens/g20.2_TPO_lg.jpg" },
-                { nome: "(g20.3) Despertai!", q: [0], img: "imagens/g20.3_TPO_lg.jpg" },
-                { nome: "(g21.1) Despertai!", q: [0], img: "imagens/g21.1_TPO_lg.jpg" },
-                { nome: "(g21.2) Despertai!", q: [0], img: "imagens/g21.2_TPO_lg.jpg" },
-                { nome: "(g21.3) Despertai!", q: [532], img: "imagens/g21.3_TPO_lg.jpg" },
-                { nome: "(g22.1) Despertai!", q: [0], img: "imagens/g22.1_TPO_lg.jpg" },
+                { nome: "(g18.1) Despertai!", q: [0], img: "imagens/g_T_201801_lg.jpg" },
+                { nome: "(g18.2) Despertai!", q: [576], img: "imagens/g_T_201802_lg.jpg" },
+                { nome: "(g18.3) Despertai!", q: [18], img: "imagens/g_T_201803_lg.jpg" },
+                { nome: "(g19.1) Despertai!", q: [0], img: "imagens/g_T_201901_lg.jpg" },
+                { nome: "(g19.2) Despertai!", q: [0], img: "imagens/g_T_201902_lg.jpg" },
+                { nome: "(g19.3) Despertai!", q: [0], img: "imagens/g_T_201903_lg.jpg" },
+                { nome: "(g20.1) Despertai!", q: [0], img: "imagens/g_T_202001_lg.jpg" },
+                { nome: "(g20.2) Despertai!", q: [0], img: "imagens/g_T_202002_lg.jpg" },
+                { nome: "(g20.3) Despertai!", q: [0], img: "imagens/g_T_202003_lg.jpg" },
+                { nome: "(g21.1) Despertai!", q: [0], img: "imagens/g_T_202101_lg.jpg" },
+                { nome: "(g21.2) Despertai!", q: [0], img: "imagens/g_T_202102_lg.jpg" },
+                { nome: "(g21.3) Despertai!", q: [532], img: "imagens/g_T_202103_lg.jpg" },
+                { nome: "(g22.1) Despertai!", q: [0], img: "imagens/g_T_202201_lg.jpg" },
                 { nome: "A Sentinela (Público)", q: [0], img: "imagens/w_TPO_lg.jpg" },
                 { nome: "Despertai! (Avulsas)", q: [0], img: "imagens/g_TPO_lg.jpg" }
             ],
@@ -338,24 +338,4 @@
 
         function iniciarContagem() {
             if (confirm("ATENÇÃO: Deseja iniciar um novo inventário? Isto vai atualizar as publicações e colocar as quantidades a ZERO.")) {
-                // CORREÇÃO AQUI: Força a variável 'dados' a copiar a estrutura completa e nova do código
-                dados = JSON.parse(JSON.stringify(dadosPadrao));
-                
-                // Em seguida, varre essa lista nova e coloca 0 em tudo, sem precisar recarregar o navegador
-                Object.keys(dados).forEach(cat => {
-                    dados[cat].forEach(item => {
-                        item.q = [0]; 
-                    });
-                });
-                
-                salvarLocal();
-                renderItems();
-                alert("Inventário zerado e publicações atualizadas!");
-            }
-        }
-
-        renderCats();
-        renderItems();
-    </script>
-</body>
-</html>
+                dados =
