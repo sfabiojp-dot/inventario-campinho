@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inventário Campinho/Praça Seca v1.07.2</title>
+    <title>Inventário Campinho/Praça Seca v1.08</title>
     <style>
         :root {
             --primary: #1f538d;
@@ -94,7 +94,6 @@
             font-size: 1rem;
             font-weight: 600;
         }
-        
         .btn-add, .btn-remove {
             border: none;
             border-radius: 4px;
@@ -112,7 +111,6 @@
         .btn-add:active, .btn-remove:active {
             opacity: 0.7;
         }
-
         .total-badge {
             margin-left: auto;
             font-weight: bold;
@@ -161,7 +159,7 @@
 </head>
 <body>
 
-    <header>📦 Inventário Campinho/Praça Seca v1.07.2</header>
+    <header>📦 Inventário Campinho/Praça Seca v1.08</header>
 
     <div class="nav-cats" id="catNav"></div>
 
@@ -180,15 +178,25 @@
                 { nome: "(nwtpkt) TNM (revisada - pequena)", q: [0], img: "imagens/nwtpkt_TPO_lg.jpg" }
             ],
             "Livros": [
+                { nome: "(be) Beneficie-se", q: [0], img: "imagens/be_TPO_lg.jpg" },
                 { nome: "(bhs) Entender a Bíblia!", q: [0], img: "imagens/bhs_TPO_lg.jpg" },
                 { nome: "(bt) Testemunho Cabal", q: [3], img: "imagens/bt_TPO_lg.jpg" },
+                { nome: "(cf) 'Meu Seguidor'", q: [0], img: "imagens/cf_TPO_lg.jpg" },
+                { nome: "(cl) Achegue-se", q: [0], img: "imagens/cl_TPO_lg.jpg" },
+                { nome: "(ia) Imite", q: [0], img: "imagens/ia_TPO_lg.jpg" },
+                { nome: "(jy) Jesus — o Caminho", q: [0], img: "imagens/jy_TPO_lg.jpg" },
+                { nome: "(kr) O Reino de Deus já Governa!", q: [0], img: "imagens/kr_TPO_lg.jpg" },
                 { nome: "(lff) Seja Feliz para Sempre!", q: [30], img: "imagens/lff_TPO_lg.jpg" },
-                { nome: "(od) Organizados", q: [21], img: "imagens/od_TPO_lg.jpg" },
                 { nome: "(lvs) Continue a Amar a Deus", q: [16], img: "imagens/lvs_TPO_lg.jpg" },
+                { nome: "(od) Organizados", q: [21], img: "imagens/od_TPO_lg.jpg" },
                 { nome: "(rr) Adoração Pura Restabelecida!", q: [0], img: "imagens/rr_TPO_lg.jpg" },
-                { nome: "(jy) Jesus — O Caminho", q: [0], img: "imagens/jy_TPO_lg.jpg" },
-                { nome: "(ia) Imite a Sua Fé", q: [0], img: "imagens/ia_TPO_lg.jpg" },
-                { nome: "(kr) O Reino de Deus já Governa!", q: [0], img: "imagens/kr_TPO_lg.jpg" }
+                { nome: "(scl) Princípios Bíblicos para a Vida Cristã", q: [5], img: "imagens/scl_TPO_lg.jpg" },
+                { nome: "(sjj) Cante de Coração", q: [0], img: "imagens/sjj_TPO_lg.jpg" },
+                { nome: "(sjjls) Cante de Coração (edição grande)", q: [0], img: "imagens/sjjls_TPO_lg.jpg" },
+                { nome: "(sjjyls) Cante de Coração — sem pauta", q: [1], img: "imagens/sjjyls_TPO_lg.jpg" },
+                { nome: "(wcg) Coragem", q: [12], img: "imagens/wcg_TPO_lg.jpg" },
+                { nome: "(yp1) Os Jovens Perguntam, Volume 1", q: [5], img: "imagens/yp1_TPO_lg.jpg" },
+                { nome: "(yp2) Os Jovens Perguntam, Volume 2", q: [5], img: "imagens/yp2_TPO_lg.jpg" }
             ],
             "Brochuras e livretos": [
                 { nome: "(ay) Aplique-se à Leitura e à Escrita", q: [3], img: "imagens/ay_TPO_lg.jpg" },
@@ -260,7 +268,6 @@
 
         let dados = JSON.parse(localStorage.getItem('inventario_campinho_dados')) || dadosPadrao;
 
-        // Limpeza de memória automática para as opções avulsas
         if (dados["Revistas"]) {
             dados["Revistas"] = dados["Revistas"].filter(item => 
                 item.nome !== "A Sentinela (Público) - Avulsas" && 
@@ -319,14 +326,15 @@
                 container.appendChild(card);
             });
 
-            if (catAtual === "Revistas") {
+            // Mostra o botão de cadastrar item em todas as abas, menos na "Bíblias"
+            if (catAtual !== "Bíblias") {
                 const btnAddNova = document.createElement("button");
                 btnAddNova.className = "btn-new-item";
-                btnAddNova.innerText = "➕ Cadastrar número novo";
+                btnAddNova.innerText = "➕ Cadastrar item novo";
                 btnAddNova.onclick = () => {
-                    const nomeNova = prompt("Digite o nome ou código da nova revista (Ex: wp24.2):");
+                    const nomeNova = prompt(`Digite o nome ou código do novo item para a categoria ${catAtual}:`);
                     if (nomeNova && nomeNova.trim() !== "") {
-                        dados["Revistas"].push({ nome: nomeNova.trim(), q: [0], img: "" });
+                        dados[catAtual].push({ nome: nomeNova.trim(), q: [0], img: "" });
                         salvarLocal();
                         renderItems();
                     }
