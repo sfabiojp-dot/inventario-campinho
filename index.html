@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inventário Campinho/Praça Seca v1.08.1</title>
+    <title>Inventário Campinho/Praça Seca v1.09</title>
     <style>
         :root {
             --primary: #1f538d;
@@ -21,11 +21,11 @@
         header {
             background-color: var(--primary);
             color: white;
-            padding: 14px;
+            padding: 10px;
             border-radius: 10px;
             text-align: center;
             font-weight: bold;
-            font-size: 1.1rem;
+            font-size: 0.95rem;
             margin-bottom: 12px;
         }
         .nav-cats {
@@ -120,6 +120,30 @@
             padding: 6px 8px;
             border-radius: 6px;
         }
+        .obs-container {
+            background: var(--card);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .obs-title {
+            font-size: 0.95rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+        .obs-textarea {
+            width: 100%;
+            height: 100px;
+            padding: 8px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            resize: vertical;
+            box-sizing: border-box;
+        }
         .actions {
             margin-top: 20px;
             display: flex;
@@ -139,31 +163,20 @@
         .action-btn:active {
             opacity: 0.9;
         }
-        .btn-new-item {
-            width: 100%;
-            background-color: #f1f5f9;
-            color: var(--primary);
-            border: 2px solid var(--primary);
-            padding: 12px;
-            border-radius: 8px;
-            font-weight: bold;
-            font-size: 0.95rem;
-            cursor: pointer;
-            margin-top: 5px;
-            margin-bottom: 15px;
-        }
-        .btn-new-item:active {
-            background-color: #e2e8f0;
-        }
     </style>
 </head>
 <body>
 
-    <header>📦 Inventário Campinho/Praça Seca v1.08.1</header>
+    <header>📦 Inventário Campinho/Praça Seca v1.09</header>
 
     <div class="nav-cats" id="catNav"></div>
 
     <div id="itemsContainer"></div>
+
+    <div class="obs-container">
+        <div class="obs-title">Observações / Itens não listados</div>
+        <textarea id="obsArea" class="obs-textarea" placeholder="Ex: A Sentinela wp24.3 - 50 un..." onchange="salvarObs(this.value)"></textarea>
+    </div>
 
     <div class="actions">
         <button class="action-btn" onclick="iniciarContagem()">🔄 Iniciar inventário</button>
@@ -220,11 +233,16 @@
                 { nome: "(ypq) 10 Perguntas que os Jovens Fazem", q: [0], img: "imagens/ypq_TPO_lg.jpg" }
             ],
             "Folhetos": [
-                { nome: "(T-30) O Que Você Acha da Bíblia?", q: [0], img: "imagens/t30_TPO_lg.jpg" },
-                { nome: "(T-31) Como Você Vê o Futuro?", q: [0], img: "imagens/t31_TPO_lg.jpg" },
-                { nome: "(T-32) O Que É Preciso para Ter uma Família Feliz?", q: [0], img: "imagens/t32_TPO_lg.jpg" },
-                { nome: "(T-33) Quem É o Verdadeiro Governante do Mundo?", q: [0], img: "imagens/t33_TPO_lg.jpg" },
-                { nome: "(T-34) O Sofrimento Vai Acabar Algum Dia?", q: [0], img: "imagens/t34_TPO_lg.jpg" }
+                { nome: "(inv) Convite para Reuniões Cristãs", q: [1200], img: "imagens/inv_TPO_lg.jpg" },
+                { nome: "(T-dth) Morte [folheto]", q: [0], img: "imagens/tdth_TPO_lg.jpg" },
+                { nome: "(T-fam) Família [folheto]", q: [0], img: "imagens/tfam_TPO_lg.jpg" },
+                { nome: "(T-ftr) Futuro [folheto]", q: [0], img: "imagens/tftr_TPO_lg.jpg" },
+                { nome: "(T-god) Deus [folheto]", q: [0], img: "imagens/tgod_TPO_lg.jpg" },
+                { nome: "(T-jss) Jesus [folheto]", q: [0], img: "imagens/tjss_TPO_lg.jpg" },
+                { nome: "(T-kng) Reino de Deus [folheto]", q: [0], img: "imagens/tkng_TPO_lg.jpg" },
+                { nome: "(T-pry) Oração [folheto]", q: [0], img: "imagens/tpry_TPO_lg.jpg" },
+                { nome: "(T-rlg) Religião [folheto]", q: [0], img: "imagens/trlg_TPO_lg.jpg" },
+                { nome: "(T-sfr) Sofrimento [folheto]", q: [0], img: "imagens/tsfr_TPO_lg.jpg" }
             ],
             "Revistas": [
                 { nome: "(g18.1) Despertai!", q: [0], img: "imagens/g_T_201801_lg.jpg" },
@@ -269,27 +287,18 @@
         let dadosSalvos = JSON.parse(localStorage.getItem('inventario_campinho_dados'));
         let dados = {};
 
-        // Sincronização Inteligente: Mescla a memória do celular com o código novo
         if (dadosSalvos) {
             Object.keys(dadosPadrao).forEach(cat => {
                 if (!dadosSalvos[cat]) {
                     dados[cat] = JSON.parse(JSON.stringify(dadosPadrao[cat]));
                 } else {
                     let novaArray = [];
-                    // 1. Mantém a ordem oficial do código e preserva as quantidades que o usuário já digitou
                     dadosPadrao[cat].forEach(itemPadrao => {
                         const itemSalvo = dadosSalvos[cat].find(i => i.nome === itemPadrao.nome);
                         if (itemSalvo) {
                             novaArray.push(itemSalvo);
                         } else {
                             novaArray.push(JSON.parse(JSON.stringify(itemPadrao)));
-                        }
-                    });
-                    // 2. Adiciona no final os itens que o usuário cadastrou manualmente pelo botão "➕"
-                    dadosSalvos[cat].forEach(itemSalvo => {
-                        const temNoPadrao = dadosPadrao[cat].find(i => i.nome === itemSalvo.nome);
-                        if (!temNoPadrao && itemSalvo.nome !== "A Sentinela (Público) - Avulsas" && itemSalvo.nome !== "Despertai! (Avulsas)" && itemSalvo.nome !== "A Sentinela (Público)") {
-                            novaArray.push(itemSalvo);
                         }
                     });
                     dados[cat] = novaArray;
@@ -301,9 +310,17 @@
         }
 
         let catAtual = Object.keys(dados)[0];
+        
+        let observacoesGerais = localStorage.getItem('inventario_campinho_obs') || "";
+        document.getElementById('obsArea').value = observacoesGerais;
 
         function salvarLocal() {
             localStorage.setItem('inventario_campinho_dados', JSON.stringify(dados));
+        }
+        
+        function salvarObs(texto) {
+            observacoesGerais = texto;
+            localStorage.setItem('inventario_campinho_obs', observacoesGerais);
         }
 
         function renderCats() {
@@ -348,21 +365,6 @@
                 `;
                 container.appendChild(card);
             });
-
-            if (catAtual !== "Bíblias") {
-                const btnAddNova = document.createElement("button");
-                btnAddNova.className = "btn-new-item";
-                btnAddNova.innerText = "➕ Cadastrar item novo";
-                btnAddNova.onclick = () => {
-                    const nomeNova = prompt(`Digite o nome ou código do novo item para a categoria ${catAtual}:`);
-                    if (nomeNova && nomeNova.trim() !== "") {
-                        dados[catAtual].push({ nome: nomeNova.trim(), q: [0], img: "" });
-                        salvarLocal();
-                        renderItems();
-                    }
-                };
-                container.appendChild(btnAddNova);
-            }
         }
 
         function updateQtd(cat, itemIdx, fieldIdx, val) {
@@ -408,6 +410,13 @@
                 });
                 txt += "\n";
             });
+            
+            if (observacoesGerais && observacoesGerais.trim() !== "") {
+                txt += "[ OBSERVAÇÕES / ITENS NÃO LISTADOS ]\n";
+                txt += "-----------------------------------------------\n";
+                txt += observacoesGerais + "\n\n";
+            }
+            
             return txt;
         }
 
@@ -424,15 +433,6 @@
             if (confirm("ATENÇÃO: Deseja iniciar um novo inventário? As quantidades voltarão a zero.")) {
                 let novosDados = JSON.parse(JSON.stringify(dadosPadrao));
                 
-                Object.keys(dados).forEach(cat => {
-                    dados[cat].forEach(item => {
-                        let existeNoPadrao = novosDados[cat].find(i => i.nome === item.nome);
-                        if (!existeNoPadrao) {
-                            novosDados[cat].push({ nome: item.nome, q: [0], img: item.img || "" });
-                        }
-                    });
-                });
-                
                 Object.keys(novosDados).forEach(cat => {
                     novosDados[cat].forEach(item => {
                         item.q = [0]; 
@@ -441,6 +441,10 @@
 
                 dados = novosDados;
                 salvarLocal();
+                
+                document.getElementById('obsArea').value = "";
+                salvarObs("");
+                
                 renderItems();
                 alert("Inventário zerado com sucesso!");
             }
