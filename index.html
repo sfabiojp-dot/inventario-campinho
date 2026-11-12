@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inventário Campinho/Praça Seca v1.04</title>
+    <title>Inventário Campinho/Praça Seca v1.05</title>
     <style>
         :root {
             --primary: #1f538d;
@@ -150,7 +150,7 @@
 </head>
 <body>
 
-    <header>📦 Inventário Campinho/Praça Seca v1.04</header>
+    <header>📦 Inventário Campinho/Praça Seca v1.05</header>
 
     <div class="nav-cats" id="catNav"></div>
 
@@ -162,7 +162,6 @@
     </div>
 
     <script>
-        // Os arrays de quantidade "q" iniciam agora com apenas 1 valor.
         const dadosPadrao = {
             "Bíblias": [
                 { nome: "(nwt) Tradução do Novo Mundo", q: [0], img: "imagens/nwt_TPO_lg.jpg" },
@@ -209,8 +208,21 @@
                 { nome: "(T-34) O Sofrimento Vai Acabar Algum Dia?", q: [0], img: "imagens/t34_TPO_lg.jpg" }
             ],
             "Revistas": [
+                { nome: "(g18.1) Despertai!", q: [0], img: "imagens/g18.1_TPO_lg.jpg" },
+                { nome: "(g18.2) Despertai!", q: [576], img: "imagens/g18.2_TPO_lg.jpg" },
+                { nome: "(g18.3) Despertai!", q: [18], img: "imagens/g18.3_TPO_lg.jpg" },
+                { nome: "(g19.1) Despertai!", q: [0], img: "imagens/g19.1_TPO_lg.jpg" },
+                { nome: "(g19.2) Despertai!", q: [0], img: "imagens/g19.2_TPO_lg.jpg" },
+                { nome: "(g19.3) Despertai!", q: [0], img: "imagens/g19.3_TPO_lg.jpg" },
+                { nome: "(g20.1) Despertai!", q: [0], img: "imagens/g20.1_TPO_lg.jpg" },
+                { nome: "(g20.2) Despertai!", q: [0], img: "imagens/g20.2_TPO_lg.jpg" },
+                { nome: "(g20.3) Despertai!", q: [0], img: "imagens/g20.3_TPO_lg.jpg" },
+                { nome: "(g21.1) Despertai!", q: [0], img: "imagens/g21.1_TPO_lg.jpg" },
+                { nome: "(g21.2) Despertai!", q: [0], img: "imagens/g21.2_TPO_lg.jpg" },
+                { nome: "(g21.3) Despertai!", q: [532], img: "imagens/g21.3_TPO_lg.jpg" },
+                { nome: "(g22.1) Despertai!", q: [0], img: "imagens/g22.1_TPO_lg.jpg" },
                 { nome: "A Sentinela (Público)", q: [0], img: "imagens/w_TPO_lg.jpg" },
-                { nome: "Despertai!", q: [0], img: "imagens/g_TPO_lg.jpg" }
+                { nome: "Despertai! (Avulsas)", q: [0], img: "imagens/g_TPO_lg.jpg" }
             ],
             "Outros": [
                 { nome: "KITS Diversos", q: [0], img: "imagens/kits_TPO_lg.jpg" },
@@ -250,7 +262,7 @@
                 
                 let inputsHtml = "";
                 item.q.forEach((qtd, fieldIdx) => {
-                    inputsHtml += `<input type="number" class="qtd-input" value="${qtd}" onchange="updateQtd('${catAtual}', ${idx}, ${fieldIdx}, this.value)">`;
+                    inputsHtml += `<input type="number" class="qtd-input" value="${qtd}" onchange="updateQtd('${catAtual}', ${idx},${fieldIdx}, this.value)">`;
                 });
                 
                 card.innerHTML = `
@@ -258,89 +270,3 @@
                     <div class="item-info">
                         <div class="item-title">${item.nome}</div>
                         <div class="qtd-container">
-                            ${inputsHtml}
-                            <button class="btn-add" onclick="adicionarCampo('${catAtual}', ${idx})" title="Adicionar campo de quantidade">+</button>
-                            <button class="btn-remove" onclick="removerCampo('${catAtual}', ${idx})" title="Remover último campo">-</button>
-                            <span class="total-badge">Total: ${total}</span>
-                        </div>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        function updateQtd(cat, itemIdx, fieldIdx, val) {
-            dados[cat][itemIdx].q[fieldIdx] = parseInt(val) || 0;
-            salvarLocal();
-            renderItems();
-        }
-
-        function adicionarCampo(cat, itemIdx) {
-            dados[cat][itemIdx].q.push(0);
-            salvarLocal();
-            renderItems();
-        }
-
-        function removerCampo(cat, itemIdx) {
-            // Garante que fica sempre pelo menos um campo visível
-            if (dados[cat][itemIdx].q.length > 1) {
-                dados[cat][itemIdx].q.pop();
-                salvarLocal();
-                renderItems();
-            }
-        }
-
-        function gerarTextoRelatorio() {
-            let txt = "===============================================\n";
-            txt += "    RELATÓRIO DE INVENTÁRIO - CAMPINHO/PRAÇA SECA \n";
-            txt += "===============================================\n\n";
-
-            Object.keys(dados).forEach(cat => {
-                txt += `[ ${cat.toUpperCase()} ]\n`;
-                txt += "-----------------------------------------------\n";
-                dados[cat].forEach(item => {
-                    let total = 0;
-                    let strQtds = "";
-                    
-                    item.q.forEach((qtd, i) => {
-                        const valor = parseInt(qtd) || 0;
-                        total += valor;
-                        strQtds += `Qtd ${i+1}: ${valor} | `;
-                    });
-                    
-                    txt += `${item.nome}\n`;
-                    txt += `  -> ${strQtds}Total: ${total}\n\n`;
-                });
-                txt += "\n";
-            });
-            return txt;
-        }
-
-        function exportarTXT() {
-            const txt = gerarTextoRelatorio();
-            const blob = new Blob([txt], { type: 'text/plain;charset=utf-8;' });
-            const link = document.createElement("a");
-            link.href = URL.createObjectURL(blob);
-            link.download = "inventario_campinho_praca_seca.txt";
-            link.click();
-        }
-
-        function iniciarContagem() {
-            if (confirm("ATENÇÃO: Deseja iniciar um novo inventário? Isto vai colocar todas as quantidades a ZERO em todas as abas.")) {
-                // Percorre todos os itens de todas as categorias e zera-os à força
-                Object.keys(dados).forEach(cat => {
-                    dados[cat].forEach(item => {
-                        item.q = [0]; // Reduz a 1 campo com valor 0
-                    });
-                });
-                salvarLocal();
-                renderItems();
-                alert("O inventário foi zerado com sucesso. Pode iniciar a contagem!");
-            }
-        }
-
-        renderCats();
-        renderItems();
-    </script>
-</body>
-</html>
