@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inventário Campinho/Praça Seca v1.06</title>
+    <title>Inventário Campinho/Praça Seca v1.06.1</title>
     <style>
         :root {
             --primary: #1f538d;
@@ -150,7 +150,7 @@
 </head>
 <body>
 
-    <header>📦 Inventário Campinho/Praça Seca v1.06</header>
+    <header>📦 Inventário Campinho/Praça Seca v1.06.1</header>
 
     <div class="nav-cats" id="catNav"></div>
 
@@ -337,16 +337,20 @@
         }
 
         function iniciarContagem() {
-            if (confirm("ATENÇÃO: Deseja iniciar um novo inventário? Isto vai colocar todas as quantidades a ZERO em todas as abas.")) {
-                // Altera diretamente os números na memória para 0 e atualiza a tela sem recarregar a página
+            if (confirm("ATENÇÃO: Deseja iniciar um novo inventário? Isto vai atualizar as publicações e colocar as quantidades a ZERO.")) {
+                // CORREÇÃO AQUI: Força a variável 'dados' a copiar a estrutura completa e nova do código
+                dados = JSON.parse(JSON.stringify(dadosPadrao));
+                
+                // Em seguida, varre essa lista nova e coloca 0 em tudo, sem precisar recarregar o navegador
                 Object.keys(dados).forEach(cat => {
                     dados[cat].forEach(item => {
                         item.q = [0]; 
                     });
                 });
+                
                 salvarLocal();
                 renderItems();
-                alert("Inventário zerado! Todas as quantidades estão agora em zero.");
+                alert("Inventário zerado e publicações atualizadas!");
             }
         }
 
