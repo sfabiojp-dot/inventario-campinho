@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inventário Campinho/Praça Seca v1.05</title>
+    <title>Inventário Campinho/Praça Seca v1.06</title>
     <style>
         :root {
             --primary: #1f538d;
@@ -150,7 +150,7 @@
 </head>
 <body>
 
-    <header>📦 Inventário Campinho/Praça Seca v1.05</header>
+    <header>📦 Inventário Campinho/Praça Seca v1.06</header>
 
     <div class="nav-cats" id="catNav"></div>
 
@@ -337,10 +337,16 @@
         }
 
         function iniciarContagem() {
-            if (confirm("ATENÇÃO: Deseja iniciar um novo inventário? Isto vai limpar a memória antiga, puxar a lista nova de publicações e zerar as quantidades.")) {
-                // AQUI ESTÁ A CORREÇÃO: Apaga de fato a memória local para forçar o código a puxar a lista completa nova no reload
-                localStorage.removeItem('inventario_campinho_dados');
-                window.location.reload(true);
+            if (confirm("ATENÇÃO: Deseja iniciar um novo inventário? Isto vai colocar todas as quantidades a ZERO em todas as abas.")) {
+                // Altera diretamente os números na memória para 0 e atualiza a tela sem recarregar a página
+                Object.keys(dados).forEach(cat => {
+                    dados[cat].forEach(item => {
+                        item.q = [0]; 
+                    });
+                });
+                salvarLocal();
+                renderItems();
+                alert("Inventário zerado! Todas as quantidades estão agora em zero.");
             }
         }
 
