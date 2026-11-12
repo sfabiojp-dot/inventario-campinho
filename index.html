@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inventário Campinho/Praça Seca v1.07</title>
+    <title>Inventário Campinho/Praça Seca v1.07.2</title>
     <style>
         :root {
             --primary: #1f538d;
@@ -95,25 +95,19 @@
             font-weight: 600;
         }
         
-        /* Novos botões sólidos e menores */
         .btn-add, .btn-remove {
             border: none;
             border-radius: 4px;
-            width: 28px;
-            height: 28px;
-            font-size: 1.1rem;
+            width: 24px;
+            height: 24px;
+            font-size: 1rem;
             font-weight: bold;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-        }
-        .btn-add {
             background-color: var(--primary);
-        }
-        .btn-remove {
-            background-color: #ef4444;
         }
         .btn-add:active, .btn-remove:active {
             opacity: 0.7;
@@ -167,7 +161,7 @@
 </head>
 <body>
 
-    <header>📦 Inventário Campinho/Praça Seca v1.07</header>
+    <header>📦 Inventário Campinho/Praça Seca v1.07.2</header>
 
     <div class="nav-cats" id="catNav"></div>
 
@@ -265,6 +259,17 @@
         };
 
         let dados = JSON.parse(localStorage.getItem('inventario_campinho_dados')) || dadosPadrao;
+
+        // Limpeza de memória automática para as opções avulsas
+        if (dados["Revistas"]) {
+            dados["Revistas"] = dados["Revistas"].filter(item => 
+                item.nome !== "A Sentinela (Público) - Avulsas" && 
+                item.nome !== "Despertai! (Avulsas)" && 
+                item.nome !== "A Sentinela (Público)"
+            );
+            localStorage.setItem('inventario_campinho_dados', JSON.stringify(dados));
+        }
+
         let catAtual = Object.keys(dados)[0];
 
         function salvarLocal() {
@@ -291,7 +296,6 @@
                 const card = document.createElement("div");
                 card.className = "card";
                 
-                // Tenta puxar a imagem do dadosPadrao, se for um item novo manual, usa a imagem salva ou oculta
                 const itemPadrao = dadosPadrao[catAtual] ? dadosPadrao[catAtual].find(i => i.nome === item.nome) : null;
                 const imgPath = (itemPadrao ? itemPadrao.img : (item.img || ''));
                 
@@ -315,7 +319,6 @@
                 container.appendChild(card);
             });
 
-            // Botão exclusivo para adicionar revistas novas
             if (catAtual === "Revistas") {
                 const btnAddNova = document.createElement("button");
                 btnAddNova.className = "btn-new-item";
@@ -391,7 +394,6 @@
             if (confirm("ATENÇÃO: Deseja iniciar um novo inventário? As quantidades voltarão a zero.")) {
                 let novosDados = JSON.parse(JSON.stringify(dadosPadrao));
                 
-                // Protege os itens que foram cadastrados manualmente pelo usuário para não serem apagados
                 Object.keys(dados).forEach(cat => {
                     dados[cat].forEach(item => {
                         let existeNoPadrao = novosDados[cat].find(i => i.nome === item.nome);
@@ -401,7 +403,6 @@
                     });
                 });
                 
-                // Zera todas as quantidades para 0
                 Object.keys(novosDados).forEach(cat => {
                     novosDados[cat].forEach(item => {
                         item.q = [0]; 
