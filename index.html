@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inventário Campinho/Praça Seca v1.10.2</title>
+    <title>Inventário Campinho/Praça Seca v1.10.3</title>
     <!-- Biblioteca para leitura de QR Code -->
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <style>
@@ -215,7 +215,7 @@
 </head>
 <body>
 
-    <header>📦 Inventário Campinho/Praça Seca v1.10.2</header>
+    <header>📦 Inventário Campinho/Praça Seca v1.10.3</header>
 
     <div class="nav-cats" id="catNav"></div>
 
@@ -519,7 +519,7 @@
             }
         }
 
-        // ---- LÓGICA DO QR CODE (ALTA RESOLUÇÃO) ----
+        // ---- LÓGICA DO QR CODE (CORRIGIDO PARA SAFARI/IOS) ----
         let html5QrCode = null;
         let isScanning = false;
 
@@ -529,11 +529,11 @@
                 html5QrCode = new Html5Qrcode("reader");
             }
             
+            // Removida a exigência de resolução máxima para evitar tela em branco no iPhone
             html5QrCode.start(
-                // Pede a câmera traseira na maior resolução possível para ler de longe
-                { facingMode: "environment", width: { ideal: 1920 }, height: { ideal: 1080 } },
+                { facingMode: "environment" },
                 { 
-                    fps: 20, // Leitura super rápida
+                    fps: 10, 
                     qrbox: { width: 250, height: 250 } 
                 },
                 (decodedText, decodedResult) => {
@@ -554,7 +554,7 @@
             ).then(() => {
                 isScanning = true;
             }).catch((err) => {
-                alert("Erro ao acessar a câmera. Verifique se o Safari tem permissão para usar a câmera.");
+                alert("Erro ao iniciar a câmera: " + err);
                 fecharQR();
             });
         }
