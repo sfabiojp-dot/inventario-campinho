@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inventário Campinho/Praça Seca v1.10</title>
+    <title>Inventário Campinho/Praça Seca v1.10.1</title>
     <!-- Biblioteca para leitura de QR Code -->
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <style>
@@ -12,8 +12,6 @@
             --bg: #f4f6f9;
             --card: #ffffff;
             --text: #1a1a1a;
-            --whatsapp: #25D366;
-            --qr: #10b981;
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -167,10 +165,8 @@
         .action-btn:active {
             opacity: 0.9;
         }
-        .btn-wa { background-color: var(--whatsapp); }
-        .btn-qr { background-color: var(--qr); }
         
-        /* Modal do QR Code */
+        /* Modal do QR Code Limpo */
         #qr-modal {
             display: none;
             position: fixed;
@@ -191,12 +187,18 @@
             max-width: 400px;
             text-align: center;
         }
-        #reader { width: 100%; }
+        #reader { 
+            width: 100%; 
+            min-height: 250px;
+            background-color: #f1f5f9;
+            border-radius: 8px;
+            overflow: hidden;
+        }
         .btn-cancelar-qr {
             margin-top: 15px;
             width: 100%;
             padding: 12px;
-            background: #ef4444;
+            background: var(--primary);
             color: white;
             border: none;
             border-radius: 8px;
@@ -207,7 +209,7 @@
 </head>
 <body>
 
-    <header>📦 Inventário Campinho/Praça Seca v1.10</header>
+    <header>📦 Inventário Campinho/Praça Seca v1.10.1</header>
 
     <div class="nav-cats" id="catNav"></div>
 
@@ -218,19 +220,20 @@
         <textarea id="obsArea" class="obs-textarea" placeholder="Ex: A Sentinela wp24.3 - 50 un..." onchange="salvarObs(this.value)"></textarea>
     </div>
 
+    <!-- Todos os botões em azul padrão -->
     <div class="actions">
-        <button class="action-btn btn-wa" onclick="enviarWhatsApp()">💬 WhatsApp</button>
+        <button class="action-btn" onclick="enviarWhatsApp()">💬 WhatsApp</button>
         <button class="action-btn" onclick="exportarTXT()">📄 Baixar TXT</button>
     </div>
     <div class="actions">
         <button class="action-btn" onclick="iniciarContagem()">🔄 Iniciar inventário</button>
-        <button class="action-btn btn-qr" onclick="abrirQR()">📷 Ler QR Code</button>
+        <button class="action-btn" onclick="abrirQR()">📷 Ler QR Code</button>
     </div>
 
-    <!-- Interface da Câmera -->
+    <!-- Interface da Câmera Limpa -->
     <div id="qr-modal">
         <div class="qr-box">
-            <h3 style="margin-top: 0; color: var(--primary);">Leitor de QR Code</h3>
+            <h3 style="margin-top: 0; color: var(--primary);">Aponte para o QR Code</h3>
             <div id="reader"></div>
             <button class="btn-cancelar-qr" onclick="fecharQR()">Cancelar</button>
         </div>
@@ -509,38 +512,55 @@
             }
         }
 
-        // ---- LÓGICA DO QR CODE ----
-        let html5QrcodeScanner = null;
+        // ---- LÓGICA DO QR CODE (NOVA E DIRETA) ----
+        let html5QrCode = null;
+        let isScanning = false;
 
         function abrirQR() {
             document.getElementById("qr-modal").style.display = "flex";
-            if (!html5QrcodeScanner) {
-                html5QrcodeScanner = new Html5QrcodeScanner(
-                    "reader",
-                    { fps: 10, qrbox: { width: 250, height: 250 } },
-                    false
-                );
+            if (!html5QrCode) {
+                // Instancia a câmera direta na div 'reader', sem a interface feia
+                html5QrCode = new Html5Qrcode("reader");
             }
-            html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+            
+            html5QrCode.start(
+                { facingMode: "environment" }, // Força a câmera traseira do celular
+                { fps: 10, qrbox: { width: 250, height: 250 } },
+                (decodedText, decodedResult) => {
+                    if (isScanning) {
+                        isScanning = false;
+                        html5QrCode.stop().then(() => {
+                            fecharQR();
+                            processarLeitura(decodedText);
+                        }).catch(err => {
+                            fecharQR();
+                            processarLeitura(decodedText);
+                        });
+                    }
+                },
+                (errorMessage) => {
+                    // Ignora erros normais de fundo enquanto a câmera tenta focar
+                }
+            ).then(() => {
+                isScanning = true;
+            }).catch((err) => {
+                alert("Erro ao acessar a câmera. Verifique se o Safari tem permissão para usar a câmera.");
+                fecharQR();
+            });
         }
 
         function fecharQR() {
             document.getElementById("qr-modal").style.display = "none";
-            if (html5QrcodeScanner) {
-                html5QrcodeScanner.clear().catch(error => {
-                    console.error("Erro ao desligar a câmera", error);
-                });
-                html5QrcodeScanner = null;
+            if (html5QrCode && isScanning) {
+                isScanning = false;
+                html5QrCode.stop().catch(err => console.log("Erro ao desligar a câmera", err));
             }
         }
 
-        function onScanSuccess(decodedText, decodedResult) {
-            fecharQR(); // Desliga a câmera e fecha a janela na hora
-            
+        function processarLeitura(decodedText) {
             let achouCategoria = null;
             let achouIndex = -1;
             
-            // Procura o texto do QR Code nos nomes dos itens da nossa lista
             Object.keys(dados).forEach(cat => {
                 let idx = dados[cat].findIndex(i => i.nome.toLowerCase().includes(decodedText.toLowerCase().trim()));
                 if(idx !== -1) {
@@ -554,11 +574,9 @@
                 let qtdAdicionar = prompt(`✅ Item encontrado: ${item.nome}\n\nQuantas unidades você deseja ADICIONAR à contagem atual?`, "1");
                 
                 if (qtdAdicionar !== null && !isNaN(qtdAdicionar) && qtdAdicionar.trim() !== "") {
-                    // Soma a quantidade na primeira caixa do item
                     dados[achouCategoria][achouIndex].q[0] += parseInt(qtdAdicionar);
                     salvarLocal();
                     
-                    // Muda para a aba do item para você ver a atualização
                     if(catAtual !== achouCategoria) {
                         catAtual = achouCategoria;
                         renderCats();
@@ -575,10 +593,6 @@
                     alert("Adicionado às observações com sucesso.");
                 }
             }
-        }
-
-        function onScanFailure(error) {
-            // Ignora falhas contínuas de leitura enquanto foca a câmera
         }
 
         renderCats();
