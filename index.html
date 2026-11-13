@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inventário Campinho/Praça Seca v1.10.1</title>
+    <title>Inventário Campinho/Praça Seca v1.10.2</title>
     <!-- Biblioteca para leitura de QR Code -->
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <style>
@@ -205,11 +205,17 @@
             font-weight: bold;
             cursor: pointer;
         }
+        .qr-dica {
+            font-size: 0.85rem;
+            color: #64748b;
+            margin-top: -5px;
+            margin-bottom: 15px;
+        }
     </style>
 </head>
 <body>
 
-    <header>📦 Inventário Campinho/Praça Seca v1.10.1</header>
+    <header>📦 Inventário Campinho/Praça Seca v1.10.2</header>
 
     <div class="nav-cats" id="catNav"></div>
 
@@ -230,10 +236,11 @@
         <button class="action-btn" onclick="abrirQR()">📷 Ler QR Code</button>
     </div>
 
-    <!-- Interface da Câmera Limpa -->
+    <!-- Interface da Câmera -->
     <div id="qr-modal">
         <div class="qr-box">
             <h3 style="margin-top: 0; color: var(--primary);">Aponte para o QR Code</h3>
+            <p class="qr-dica">Dica: Afaste o celular (uns 15 a 20cm) para a câmera focar melhor no código.</p>
             <div id="reader"></div>
             <button class="btn-cancelar-qr" onclick="fecharQR()">Cancelar</button>
         </div>
@@ -512,20 +519,23 @@
             }
         }
 
-        // ---- LÓGICA DO QR CODE (NOVA E DIRETA) ----
+        // ---- LÓGICA DO QR CODE (ALTA RESOLUÇÃO) ----
         let html5QrCode = null;
         let isScanning = false;
 
         function abrirQR() {
             document.getElementById("qr-modal").style.display = "flex";
             if (!html5QrCode) {
-                // Instancia a câmera direta na div 'reader', sem a interface feia
                 html5QrCode = new Html5Qrcode("reader");
             }
             
             html5QrCode.start(
-                { facingMode: "environment" }, // Força a câmera traseira do celular
-                { fps: 10, qrbox: { width: 250, height: 250 } },
+                // Pede a câmera traseira na maior resolução possível para ler de longe
+                { facingMode: "environment", width: { ideal: 1920 }, height: { ideal: 1080 } },
+                { 
+                    fps: 20, // Leitura super rápida
+                    qrbox: { width: 250, height: 250 } 
+                },
                 (decodedText, decodedResult) => {
                     if (isScanning) {
                         isScanning = false;
@@ -539,7 +549,7 @@
                     }
                 },
                 (errorMessage) => {
-                    // Ignora erros normais de fundo enquanto a câmera tenta focar
+                    // Ignora erros contínuos enquanto o celular tenta focar
                 }
             ).then(() => {
                 isScanning = true;
