@@ -3,13 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inventário Campinho/Praça Seca v1.09</title>
+    <title>Inventário Campinho/Praça Seca v1.10</title>
+    <!-- Biblioteca para leitura de QR Code -->
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <style>
         :root {
             --primary: #1f538d;
             --bg: #f4f6f9;
             --card: #ffffff;
             --text: #1a1a1a;
+            --whatsapp: #25D366;
+            --qr: #10b981;
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -145,7 +149,7 @@
             box-sizing: border-box;
         }
         .actions {
-            margin-top: 20px;
+            margin-top: 10px;
             display: flex;
             gap: 10px;
         }
@@ -163,11 +167,47 @@
         .action-btn:active {
             opacity: 0.9;
         }
+        .btn-wa { background-color: var(--whatsapp); }
+        .btn-qr { background-color: var(--qr); }
+        
+        /* Modal do QR Code */
+        #qr-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .qr-box {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        #reader { width: 100%; }
+        .btn-cancelar-qr {
+            margin-top: 15px;
+            width: 100%;
+            padding: 12px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
 
-    <header>📦 Inventário Campinho/Praça Seca v1.09</header>
+    <header>📦 Inventário Campinho/Praça Seca v1.10</header>
 
     <div class="nav-cats" id="catNav"></div>
 
@@ -179,8 +219,21 @@
     </div>
 
     <div class="actions">
-        <button class="action-btn" onclick="iniciarContagem()">🔄 Iniciar inventário</button>
+        <button class="action-btn btn-wa" onclick="enviarWhatsApp()">💬 WhatsApp</button>
         <button class="action-btn" onclick="exportarTXT()">📄 Baixar TXT</button>
+    </div>
+    <div class="actions">
+        <button class="action-btn" onclick="iniciarContagem()">🔄 Iniciar inventário</button>
+        <button class="action-btn btn-qr" onclick="abrirQR()">📷 Ler QR Code</button>
+    </div>
+
+    <!-- Interface da Câmera -->
+    <div id="qr-modal">
+        <div class="qr-box">
+            <h3 style="margin-top: 0; color: var(--primary);">Leitor de QR Code</h3>
+            <div id="reader"></div>
+            <button class="btn-cancelar-qr" onclick="fecharQR()">Cancelar</button>
+        </div>
     </div>
 
     <script>
@@ -200,6 +253,7 @@
                 { nome: "(jy) Jesus — o Caminho", q: [0], img: "imagens/jy_TPO_lg.jpg" },
                 { nome: "(kr) O Reino de Deus já Governa!", q: [0], img: "imagens/kr_TPO_lg.jpg" },
                 { nome: "(lff) Seja Feliz para Sempre!", q: [30], img: "imagens/lff_TPO_lg.jpg" },
+                { nome: "(lr) Aprenda do Grande Instrutor", q: [0], img: "imagens/lr_TPO_lg.jpg" },
                 { nome: "(lvs) Continue a Amar a Deus", q: [16], img: "imagens/lvs_TPO_lg.jpg" },
                 { nome: "(od) Organizados", q: [21], img: "imagens/od_TPO_lg.jpg" },
                 { nome: "(rr) Adoração Pura Restabelecida!", q: [0], img: "imagens/rr_TPO_lg.jpg" },
@@ -310,7 +364,6 @@
         }
 
         let catAtual = Object.keys(dados)[0];
-        
         let observacoesGerais = localStorage.getItem('inventario_campinho_obs') || "";
         document.getElementById('obsArea').value = observacoesGerais;
 
@@ -429,6 +482,12 @@
             link.click();
         }
 
+        function enviarWhatsApp() {
+            const txt = gerarTextoRelatorio();
+            const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(txt)}`;
+            window.open(url, '_blank');
+        }
+
         function iniciarContagem() {
             if (confirm("ATENÇÃO: Deseja iniciar um novo inventário? As quantidades voltarão a zero.")) {
                 let novosDados = JSON.parse(JSON.stringify(dadosPadrao));
@@ -448,6 +507,78 @@
                 renderItems();
                 alert("Inventário zerado com sucesso!");
             }
+        }
+
+        // ---- LÓGICA DO QR CODE ----
+        let html5QrcodeScanner = null;
+
+        function abrirQR() {
+            document.getElementById("qr-modal").style.display = "flex";
+            if (!html5QrcodeScanner) {
+                html5QrcodeScanner = new Html5QrcodeScanner(
+                    "reader",
+                    { fps: 10, qrbox: { width: 250, height: 250 } },
+                    false
+                );
+            }
+            html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+        }
+
+        function fecharQR() {
+            document.getElementById("qr-modal").style.display = "none";
+            if (html5QrcodeScanner) {
+                html5QrcodeScanner.clear().catch(error => {
+                    console.error("Erro ao desligar a câmera", error);
+                });
+                html5QrcodeScanner = null;
+            }
+        }
+
+        function onScanSuccess(decodedText, decodedResult) {
+            fecharQR(); // Desliga a câmera e fecha a janela na hora
+            
+            let achouCategoria = null;
+            let achouIndex = -1;
+            
+            // Procura o texto do QR Code nos nomes dos itens da nossa lista
+            Object.keys(dados).forEach(cat => {
+                let idx = dados[cat].findIndex(i => i.nome.toLowerCase().includes(decodedText.toLowerCase().trim()));
+                if(idx !== -1) {
+                    achouCategoria = cat;
+                    achouIndex = idx;
+                }
+            });
+
+            if(achouCategoria) {
+                let item = dados[achouCategoria][achouIndex];
+                let qtdAdicionar = prompt(`✅ Item encontrado: ${item.nome}\n\nQuantas unidades você deseja ADICIONAR à contagem atual?`, "1");
+                
+                if (qtdAdicionar !== null && !isNaN(qtdAdicionar) && qtdAdicionar.trim() !== "") {
+                    // Soma a quantidade na primeira caixa do item
+                    dados[achouCategoria][achouIndex].q[0] += parseInt(qtdAdicionar);
+                    salvarLocal();
+                    
+                    // Muda para a aba do item para você ver a atualização
+                    if(catAtual !== achouCategoria) {
+                        catAtual = achouCategoria;
+                        renderCats();
+                    }
+                    renderItems();
+                    alert(`Foram adicionadas ${qtdAdicionar} unidades ao item ${item.nome}!`);
+                }
+            } else {
+                if(confirm(`❌ Item "${decodedText}" não foi encontrado na lista oficial.\n\nDeseja adicionar este código no campo de Observações?`)) {
+                    let obs = document.getElementById("obsArea").value;
+                    let novaObs = obs ? `${obs}\nLido via QR: ${decodedText}` : `Lido via QR: ${decodedText}`;
+                    document.getElementById("obsArea").value = novaObs;
+                    salvarObs(novaObs);
+                    alert("Adicionado às observações com sucesso.");
+                }
+            }
+        }
+
+        function onScanFailure(error) {
+            // Ignora falhas contínuas de leitura enquanto foca a câmera
         }
 
         renderCats();
